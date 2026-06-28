@@ -229,8 +229,8 @@ scope you want:
 
 ```bash
 # Clone
-git clone https://github.com/Adityaakr/orchestration-playbook-skill.git
-cd orchestration-playbook-skill
+git clone https://github.com/Adityaakr/prism-claude-code.git
+cd prism-claude-code
 
 # Global — available in every project
 mkdir -p ~/.claude/commands
