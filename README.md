@@ -33,17 +33,19 @@ flowchart TB
         UN["/prism-understand<br/>map code → memory"]
         DE["/prism-plan · /prism-build<br/>decide + roadmap"]
         IM["/prism-implement<br/>write → test → fix (green)"]
+        FB["/prism-feedback<br/>try to break it"]
         RE["/prism-retro<br/>predicted vs actual → lessons"]
-        UN --> DE --> IM --> RE
+        UN --> DE --> IM --> FB --> RE
     end
 
     DE --> ENGINE
     IM --> ENGINE
 
-    subgraph ENGINE [Deliberation Engine - shared by plan / build / implement]
+    subgraph ENGINE [Deliberation Engine - shared by plan / build / implement / feedback]
         direction LR
-        FO["FAN-OUT<br/>6–8 parallel lenses"] --> JU["JUDGE<br/>resolve, not merge"]
-        JU --> VE["VERIFY<br/>grounding file:line<br/>+ 3 skeptics refute"]
+        FO["FAN-OUT<br/>differential context<br/>(lenses see different code)"] --> DV["DIVERGENCE<br/>score - flags if<br/>diversity is cosmetic"]
+        DV --> JU["JUDGE<br/>resolve, not merge"]
+        JU --> VE["VERIFY<br/>grounding (file:line + API docs)<br/>+ 2×Opus + 1×Sonnet skeptics"]
         VE --> LP["LOOP ≤3<br/>to convergence"]
         LP -.loop until converged.-> FO
     end
@@ -51,15 +53,20 @@ flowchart TB
     UN ==writes==> MEM
     IM ==writes==> MEM
     RE ==writes==> MEM
+    ENGINE ==telemetry==> MEM
     MEM -.all stages read.-> ENGINE
 
-    MEM[("PROJECT MEMORY<br/>.prism/project-model.md<br/>invariants · conventions<br/>danger zones · decisions · lessons")]
+    MEM[("PROJECT MEMORY<br/>.prism/project-model.md<br/>invariants · conventions · file-concern map<br/>danger zones · decisions · lessons")]
+
+    ENGINE -.measured by.-> EV["/prism-eval<br/>fleet-vs-single · grounding P/R<br/>find-the-floor (may shrink default)"]
 
     classDef cmd fill:#e7f5ff,stroke:#1971c2,color:#0b3d66;
     classDef eng fill:#ebfbee,stroke:#2f9e44,color:#11522a;
     classDef mem fill:#fff9db,stroke:#e8590c,color:#7a3500;
-    class UN,DE,IM,RE cmd;
-    class FO,JU,VE,LP eng;
+    classDef ev fill:#f3e8ff,stroke:#7e22ce,color:#4a1d7a;
+    class UN,DE,IM,FB,RE cmd;
+    class EV ev;
+    class FO,DV,JU,VE,LP eng;
     class MEM mem;
 ```
 
