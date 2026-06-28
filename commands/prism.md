@@ -112,11 +112,14 @@ EXPERT FORMAT — every PLAN/BUILD draft uses this. It's how you (the user) lear
 
 ## Build → ship → learn (the closed loop)
 The full lifecycle, each stage its own command:
-understand → plan/build → **implement** → retro.
+understand → plan/build → **implement** → **feedback** → retro.
 - `/prism-implement <milestone>` is the EXECUTION loop: it writes one slice, runs the tests,
   and self-corrects until they actually pass (never faking green) — then updates memory.
+- `/prism-feedback <target>` is the ADVERSARIAL QA pass: it actively tries to BREAK a built
+  feature with real probes, reproduces every finding, and reports honest severity-ranked
+  feedback + what held up. Run it after implement, before you trust the thing.
 - `/prism-retro` compares predicted vs actual after shipping and banks the lessons.
-Suggest implement after a plan is approved, and retro after a feature is built.
+Suggest implement after a plan is approved, feedback once it's built, and retro after it ships.
 
 ## Always
 - State the orchestration you're about to run (agent count + roles) BEFORE launching.
