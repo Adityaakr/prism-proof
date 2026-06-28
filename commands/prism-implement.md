@@ -15,8 +15,20 @@ Every "this works" you say must be backed by a check you actually ran. No except
   state the slice inline. If the milestone is large/multi-part, implement only the first
   vertical slice and recommend `/prism-build` to decompose the rest. Confirm the slice in one line.
 - **Read project memory.** Load `.prism/project-model.md` — conventions, invariants
-  (NEVER violate one without flagging), danger zones. Read the surrounding code so your change
-  matches existing style, naming, and structure. Reuse utilities; don't add deps/patterns without reason.
+  (NEVER violate one without flagging), danger zones. Reuse utilities; don't add deps without reason.
+- **DETECT THE STACK & CONVENTIONS FIRST (mandatory — before writing a single line).** Inspect
+  the repo and CONFORM to what it already uses. Never impose a foreign stack:
+  - **Language:** `tsconfig.json` / `.ts`/`.tsx` files → TypeScript. Write TS, not JS, in a TS project. Match `strict` settings.
+  - **Framework:** read `package.json` deps (react/next/vue/svelte/angular/express/…) + the folder layout. Build the same way the app is built.
+  - **Styling:** `tailwind.config.*` + `className` → Tailwind (use utility classes + the project's design tokens/`shadcn` components, NOT raw inline CSS or a new `<style>`); `*.module.css` → CSS modules; styled-components/emotion → match it. Use the SAME system the project already uses.
+  - **Structure & naming:** where components/routes/hooks/utils/types live; file naming (PascalCase vs kebab), default vs named exports, import aliases (`@/…` from tsconfig paths). Mirror them exactly.
+  - **Package manager:** `pnpm-lock.yaml`/`yarn.lock`/`package-lock.json` → use the right one (never mix).
+  - **Tooling:** eslint/prettier config (match formatting), test framework (vitest/jest/playwright).
+  Read 2–3 representative existing files of the kind you're about to write and copy their shape.
+  **HARD RULE:** dropping plain HTML/CSS/JS into a TS/React/Tailwind project is a BUG — match the
+  stack or stop. If the project has NO existing convention for something genuinely new, fan out a
+  quick lens discussion (2–3 agents) to pick the best-practice approach FOR THIS STACK, apply it
+  consistently, and record the choice in `.prism` memory so future slices follow it.
 - **Detect the checks.** Find how this project verifies itself: test / typecheck / lint / build /
   run commands (package.json scripts, Makefile, etc.). If you cannot determine it, ASK — do not guess.
 - **Isolate.** If on the default branch (main/master), create a feature branch FIRST. Never

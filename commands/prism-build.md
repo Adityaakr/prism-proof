@@ -7,10 +7,17 @@ allowed-tools: Task, Read, Grep, Glob, WebSearch, WebFetch, Write
 You are the ORCHESTRATOR for a greenfield build. Don't dump a giant plan — go phase by
 phase, surfacing the decisions that gate everything BEFORE spending agents on detail.
 
-## Phase 0 — Seed from project memory
+## Phase 0 — Seed from project memory & DETECT THE STACK
 If building inside/around an existing repo, read `.prism/project-model.md` (if present) and
-feed its Architecture / Invariants / Danger zones / Lessons into the build. For a true
-greenfield repo there may be none yet — that's fine; you'll create it at the end.
+feed its Architecture / Invariants / Danger zones / Lessons into the build.
+**First decide: greenfield or existing repo?**
+- **Existing repo → CONFORM, don't choose.** Detect the stack before architecting: language
+  (`tsconfig.json` → TS), framework (`package.json` deps + layout), styling (`tailwind.config.*` →
+  Tailwind; CSS modules; styled-components), structure/naming, package manager (lockfile), and
+  tooling (eslint/prettier, test runner). The new work MUST match all of these — Phase 2 then only
+  decides choices the project hasn't already made. Never introduce a second framework/styling system
+  or drop raw HTML/CSS/JS into a typed component project.
+- **True greenfield → free choice.** No existing conventions; Phase 2 picks the stack from scratch.
 
 ## Phase 1 — FRAME (do this first)
 Extract the goal, hard constraints, and non-negotiables. If the request is under-specified,
