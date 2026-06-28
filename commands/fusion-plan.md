@@ -14,6 +14,13 @@ deliberation below, judge the agents, and synthesize. You choreograph and judge.
   Verify: top 4 load-bearing claims × 3 skeptics. Loop: hard cap 3 rounds, re-verify only NEW claims.
 State: `Mode: Y (rule fired) | Fleet: N agents`.
 
+## 0.5 Seed from project memory (do this BEFORE fan-out)
+Read `.fusion/project-model.md` if it exists, and feed its Architecture / Invariants /
+Danger zones / Lessons into every fan-out agent's context. This is what makes fusion get
+smarter about THIS project over time — don't re-derive what's already known. If the file is
+missing or looks stale/thin, say so and reason from the code directly (and consider running
+`/fusion-understand` first). Never violate a recorded invariant without explicitly flagging it.
+
 ## 1. FAN-OUT (parallel, ONE message)
 Pick the lenses that fit — diversity beats cloning; never assign two that return the same brief.
 - core (always): first-principles · adversary · practitioner
@@ -33,10 +40,15 @@ option — its STRONGEST case, then why you still passed (no strawmen). 4. Assum
 falsifiers — what it rests on + what would CHANGE the answer. 5. Open questions for the human
 (risk tolerance, business pref, budget). 6. Grounded — code claims cite `file:line`, facts cite a source.
 
-## 4. VERIFY (adversarial, parallel)
-Pull the draft's load-bearing claims. For the top 4, spawn 3 skeptic subagents each whose
-ONLY job is to REFUTE (default "refuted" if uncertain; concrete counterexample required).
-≥2 of 3 refute → claim is FALSE: strike it, fix what depended on it. Report survivors/casualties.
+## 4. VERIFY (parallel) — two checks
+**4a. Grounding check.** Every claim the draft makes about the codebase MUST cite `file:line`.
+Spawn one verifier agent that RE-OPENS each cited line and confirms it actually says what the
+claim asserts. Strike or correct any claim whose citation doesn't check out. This makes
+hallucinated "your code does X" claims structurally impossible. Report verified vs struck.
+**4b. Adversarial check.** Pull the draft's load-bearing claims. For the top 4, spawn 3 skeptic
+subagents each whose ONLY job is to REFUTE (default "refuted" if uncertain; concrete
+counterexample required). ≥2 of 3 refute → claim is FALSE: strike it, fix what depended on it.
+Report survivors/casualties.
 
 ## 5. LOOP (looped mode only — cap 3 rounds)
 Each round: re-fan the draft to the lenses in CRITIQUE mode → a punch list of concrete fixes;
@@ -50,3 +62,6 @@ which claims fell, open risk you couldn't close). If nothing changed across roun
 draft held up under attack — that's a strong signal.
 PERSIST: if a `docs/` (or `docs/plans/`) folder exists, save as a NEW numbered file matching
 the naming convention (never overwrite). Print the path.
+MEMORY: append a one-line entry to the **Decision log** in `.fusion/project-model.md` (the
+decision + a link to the saved doc), and add any NEW invariant the plan establishes (cited).
+Note the open questions/assumptions there too — `fusion-retro` will check them later.

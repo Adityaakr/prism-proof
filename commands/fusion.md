@@ -50,11 +50,18 @@ JUDGE — read all briefs, produce structured analysis NOT a merge:
 - unique insights only one lens caught
 - blind spots none addressed
 
-VERIFY (adversarial) — pull the draft's LOAD-BEARING claims (the ones it collapses
-without). For the top 4, spawn 3 skeptic subagents each, in parallel, whose ONLY job is
-to REFUTE — default to "refuted" when genuinely uncertain, must give a concrete
-counterexample or failure case. ≥2 of 3 refute → the claim is FALSE: strike it and fix
-what depended on it. Report which claims survived and which fell.
+MEMORY — read `.fusion/project-model.md` BEFORE fan-out (Architecture/Invariants/Danger
+zones/Lessons) so you build on accumulated understanding instead of re-deriving it; never
+violate a recorded invariant without flagging. After a PLAN/BUILD run, update it: new
+invariants (cited), a Decision-log entry, assumptions to be checked later. UNDERSTAND runs
+maintain it as their main artifact. This is what makes fusion compound on THIS project.
+
+VERIFY — two checks. (a) GROUNDING: every claim about the code cites `file:line`; one
+verifier agent re-opens those lines and strikes any claim the citation doesn't support
+(kills hallucinated "your code does X"). (b) ADVERSARIAL: pull the LOAD-BEARING claims; for
+the top 4, spawn 3 skeptics each whose ONLY job is to REFUTE — default "refuted" when
+uncertain, concrete counterexample required. ≥2 of 3 refute → claim is FALSE: strike it and
+fix what depended on it. Report survivors/casualties.
 
 PERSIST — looped/spec runs only: if a `docs/` (or `docs/plans/`) folder exists, save the
 final output as a NEW numbered markdown file matching the existing naming convention
@@ -98,6 +105,11 @@ EXPERT FORMAT — every PLAN/BUILD draft uses this. It's how you (the user) lear
   criteria, risk. FAN-OUT one agent per milestone to pressure-test ordering & dependencies.
 - Phase 4 — Judge the roadmap for critical-path / dependency errors; rewrite.
 - Final: smallest shippable v1 first, then the full sequence + open risks. PERSIST.
+
+## After shipping
+Once a plan has been implemented, run `/fusion-retro` on it: it compares predicted vs actual
+and writes the lessons back into `.fusion/project-model.md` — closing the loop so the next
+run is smarter. Suggest this when the user reports a fusion-planned feature is built.
 
 ## Always
 - State the orchestration you're about to run (agent count + roles) BEFORE launching.

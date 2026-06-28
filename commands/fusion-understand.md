@@ -27,3 +27,18 @@ synthesize ONE coherent model. Lead with a plain-language explanation.
 - Then "where to touch it" for the most likely changes.
 - Flag anything you could NOT confirm in the code (don't smooth it over).
 - PERSIST only if the user asks: save to `docs/` as a new numbered file, never overwrite.
+
+## Project memory (ALWAYS update — this is what makes fusion compound)
+Write/refine `.fusion/project-model.md` at the repo root (create the file + folder if missing).
+It is a durable, evidence-cited model of THIS project that every future fusion run reads first.
+Sections to maintain:
+- **Architecture** — the components and how they connect.
+- **Invariants** — the rules the code silently relies on (e.g. "amounts are 6-decimal USDC",
+  "approve must precede pay"). Each MUST carry a `file:line` citation.
+- **Conventions** — naming, patterns, where things live.
+- **Danger zones** — code that's fragile, security-sensitive, or easy to break.
+- **Decision log** — links to any `docs/NN-*.md` plans.
+- **Lessons** — left for `fusion-retro`; never delete existing ones.
+RULE: every line about the code carries a `file:line` citation. Update IN PLACE — append and
+refine, never wipe prior content. Stamp the top with today's date + which command updated it.
+Tell the user you updated project memory and what changed.

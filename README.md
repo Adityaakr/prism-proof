@@ -38,13 +38,31 @@ This playbook attacks each of those directly:
 
 | Command | Use it to… | What runs under the hood |
 |---|---|---|
-| **`/fusion-understand`** | Understand how existing code or a concept works | Parallel explorers (one per subsystem) → synthesized into one model + a `file:line` map. Read-only, fast, cheap. |
-| **`/fusion-plan`** | Design a feature, change, or architecture decision | Adaptive lens panel → judge → adversarial verify → refinement loop → saved decision doc |
+| **`/fusion-understand`** | Understand how existing code or a concept works | Parallel explorers (one per subsystem) → synthesized into one model + a `file:line` map. Builds/updates project memory. Read-only, fast. |
+| **`/fusion-plan`** | Design a feature, change, or architecture decision | Reads project memory → adaptive lens panel → judge → grounding + adversarial verify → refinement loop → saved decision doc |
 | **`/fusion-build`** | Stand up a new project from scratch | Frame the goal → architect the stack (verified) → decompose into a phased, dependency-checked roadmap that ships v1 first |
+| **`/fusion-retro`** | Learn from a shipped plan | Compares what the plan PREDICTED vs what actually shipped → writes the lessons back into project memory |
 | **`/fusion`** | Not sure which — let it decide | Auto-classifies the task into understand / plan / build and runs the right one |
 
-All four share the same primitives (below). The three named commands are leaner, focused
+All commands share the same primitives (below). The named commands are leaner, focused
 entry points; `/fusion` is the catch-all router.
+
+## What makes it different: it compounds
+
+Most prompts and workflows are **stateless** (start from zero every time), **ungrounded**
+(reason about your code from a shallow read), and **open-loop** (never learn if their advice
+was right). This skill closes all three gaps — and that's the real differentiator:
+
+- **Project memory** — `/fusion-understand` builds `.fusion/project-model.md`: a durable,
+  evidence-cited model of *your* codebase (architecture, **invariants**, danger zones,
+  decisions, lessons). Every later run reads it first, so the skill gets smarter about your
+  project over time instead of re-deriving it.
+- **Grounding verifier** — every claim about your code must cite `file:line`, and a verifier
+  agent *re-opens those lines* to confirm. Hallucinated "your code does X" claims get struck.
+- **Outcome loop** — after you ship, `/fusion-retro` compares predicted vs actual and banks
+  the lesson back into memory. The next plan starts from what the last one got wrong.
+
+Together: **stateful + grounded + self-improving** — a different category from one-shot tools.
 
 ---
 
