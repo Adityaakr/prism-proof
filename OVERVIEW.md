@@ -28,7 +28,7 @@ Prism is architected to attack each of these directly — and to *measure* the l
 2. **Judge, don't merge** — resolve contradictions and pick the better-supported side; averaging dilutes the correct answer.
 3. **Adversarial, decorrelated verification** — skeptics from a *different tier* try to refute load-bearing claims; only survivors make the final cut.
 4. **Grounded, not asserted** — every claim about code or an API is checked against a source, never recall.
-5. **Compounding memory** — each run makes the next one smarter about *this* project.
+5. **Compounding memory, two layers** — a per-project *code* model and a global *user* model; each run makes the next one smarter about both *this* project and *this* person.
 6. **Enforced, not requested** — critical safety guards are real hooks the model can't bypass.
 7. **Measured, not claimed** — the harness can prove (or disprove) its own value, and is willing to recommend shrinking itself.
 8. **Honest over reassuring** — flag uncertainty, label confidence, report what held up *and* what broke.
@@ -100,11 +100,23 @@ on a flaw both Opus slots missed. **Honest limits, recorded in telemetry:**
   correlation but not shared-lineage blind spots. Treat cross-tier survival as weaker evidence than
   grounding."*
 
-### 5e. Project Memory — the compounding layer
-`.prism/project-model.md` holds an evidence-cited model of the codebase: architecture, **invariants**
-(each cited), conventions, danger zones, a **file concern map** (for W1), a decision log, and lessons.
-`/prism-understand` builds it; plan/build/implement read it first; retro and implement write to it;
-prune keeps it true. This is what makes Prism stateful.
+### 5e. Memory — two compounding layers
+Prism keeps **two** durable memories with different lifetimes, deliberately kept separate so neither
+pollutes the other:
+
+- **Project memory — `.prism/project-model.md`** (per-repo, about the *code*). An evidence-cited
+  model: architecture, **invariants** (each cited), conventions, danger zones, a **file concern map**
+  (for W1), a decision log, and lessons. `/prism-understand` builds it; plan/build/implement read it
+  first; retro and implement write to it; prune keeps it true. This is what makes Prism stateful *per
+  project*.
+- **User memory — `~/.prism/user.md`** (global, about the *human*). A **Persona Protocol** plus a
+  profile: how to address you, your tone/verbosity/expertise, and **standing defaults** Prism applies
+  without being re-told (testnet-first, branch-before-code, commit-only-when-asked, ground-don't-recall).
+  Every command reads it first, greets you by name, adapts, and **captures durable preferences and
+  corrections** as they surface — honesty over flattery, never a yes-man. If it's missing, Prism
+  bootstraps it from `git config user.name` (asking once if needed), so a freshly-installed copy
+  greets *whoever* is at the keyboard. Ships as a sanitized `user.example.md`; the real profile stays
+  machine-local (git-ignored), like `settings.example.json`.
 
 ### 5f. Enforcement layer — prompts become hard rules
 Two real Claude Code hooks convert "the model should" into "the system enforces":

@@ -1,1 +1,5 @@
 .DS_Store
+
+# Personal/runtime memory — never commit a real profile (use user.example.md as the template)
+user.md
+.prism/

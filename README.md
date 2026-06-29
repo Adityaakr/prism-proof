@@ -164,12 +164,19 @@ was right). This skill closes all three gaps — and that's the real differentia
   evidence-cited model of *your* codebase (architecture, **invariants**, danger zones,
   decisions, lessons). Every later run reads it first, so the skill gets smarter about your
   project over time instead of re-deriving it.
+- **User memory** — a second, *global* layer (`~/.prism/user.md`) about the **human**, not the
+  code. Every command reads it first, greets you by name, and adapts to your tone, expertise, and
+  **standing defaults** (testnet-first, branch-before-code, commit-only-when-asked) without being
+  re-told — capturing your durable preferences and corrections as they surface. Kept deliberately
+  separate from project memory; a fresh install bootstraps from `git config user.name`, so it greets
+  whoever clones it (template: [`user.example.md`](user.example.md)).
 - **Grounding verifier** — every claim about your code must cite `file:line`, and a verifier
   agent *re-opens those lines* to confirm. Hallucinated "your code does X" claims get struck.
 - **Outcome loop** — after you ship, `/prism-retro` compares predicted vs actual and banks
   the lesson back into memory. The next plan starts from what the last one got wrong.
 
-Together: **stateful + grounded + self-improving** — a different category from one-shot tools.
+Together: **stateful (about the project *and* you) + grounded + self-improving** — a different
+category from one-shot tools.
 
 ## The closed loop: idea → working code → lessons
 
