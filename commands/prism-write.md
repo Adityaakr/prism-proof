@@ -31,6 +31,10 @@ Every factual claim about the project traces to a SOURCE, never to memory:
 - Re-open the files you describe and confirm they do what you are about to say. A README that claims
   a feature the code lacks is the doc equivalent of a hallucinated API. Strike anything you cannot
   confirm.
+- **W7 currency (7a).** For any SDK/API/library/term you name, confirm it is the CURRENT, canonical source
+  (official docs + the registry's last-published date; renamed / superseded / moved org scope?). Name the
+  version when it matters and mark version-sensitive examples as "illustrative". If you surface a rename or
+  outdated term, fix it in the copy THIS pass (7b); never ship a doc with known-stale names.
 - For **summary** mode, derive the change set from `git` (`git diff`, `git log`) plus the Decision log
   in memory. Reuse `/prism-retro`'s diff reading rather than reinventing it. Describe what actually
   changed, not what the plan hoped for.
@@ -68,6 +72,12 @@ Match the file's existing comment style. Do not add a comment to every line; noi
 Touch only comments; never change behavior in this mode.
 
 **article** mode: Produce ONE self-contained `.html` file (inline CSS, no external build).
+- **Audience pass (W7c), before publishing.** Re-read the draft AS a senior engineer from the exact
+  ecosystem it targets: "would they nod, or push back?" Scope every overclaim and absolute ("nothing to
+  deploy", "fully private", "X disappears", "no Y needed") to what is actually true, add the insider nuance
+  they would expect (public-vs-private, trust boundaries, liveness/observability, testnet caveats), and cut
+  anything that signals you do not actually use the thing. Grounding catches what is false; this catches
+  what is technically true but reads as naive. Report each fix as FIX / SOFTEN / HOLD.
 - **Structure:** a clear title, a one-paragraph hook (the problem and what you built), then real
   sections: the problem, the architecture, how it works, the hard decisions and trade-offs, results,
   and what is next. Use semantic HTML (`<header>`, `<section>`, `<article>`, `<figure>`). Make it

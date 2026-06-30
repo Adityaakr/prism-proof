@@ -36,6 +36,11 @@ and turns its angle into a concrete edge-case the user should test in their OWN 
 - **auth & abuse** — missing/forged auth, privilege escalation, IDOR; payments: fund-drain, double-spend.
 - **supply chain & distribution** — install method (is it `curl | bash`?), dependency provenance, checksum-after-the-pipe, version pinning, artifact/build integrity.
 - **invariant violation** — deliberately try to break each documented invariant.
+- **audience / domain-expert (W7c):** read the target AS a senior engineer from its exact ecosystem: hunt
+  overclaims and absolutes ("nothing to deploy", "fully private", "X disappears", "no Y needed"), missing
+  insider nuance (public-vs-private, trust boundaries, liveness/observability, testnet caveats), and any tell
+  the author does not actually use the thing. The correctness lenses do NOT cover this. Run it whenever the
+  target is outward-facing (article/README/post/pitch). Report each as FIX / SOFTEN / HOLD (with why).
 Each returns: what it tried/observed, what broke (or the concrete risk), the EXACT repro or evidence, a severity guess.
 
 ## 2. Verify & LABEL confidence (kill false positives)
@@ -47,6 +52,10 @@ tier only.) Then tag every finding:
 - **OBSERVATION** — from public/visible material, not exploited (passive mode).
 - **HYPOTHESIS** — plausible but unverified.
 NEVER present an OBSERVATION or HYPOTHESIS as a CONFIRMED bug. Drop what you can't support.
+**W7 currency + apply-now.** For every SDK/API/term the target names, confirm it is the CURRENT canonical
+source (official docs + last-published date; renamed / superseded / moved org scope?) and the right name/ID
+space (SDK param vs protocol enum vs wire format) before flagging or "fixing" a value. Any rename, drift, or
+outdated term you surface, fix in the user-visible text THIS pass (7b); never grade it low and defer it.
 
 ## 3. Judge & rank
 - **Severity:** CRITICAL (funds/data loss, auth bypass, state corruption) · HIGH · MEDIUM · LOW.

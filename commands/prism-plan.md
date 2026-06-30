@@ -30,6 +30,9 @@ Pick the lenses that fit — diversity beats cloning; never assign two that retu
 - core (always): first-principles · adversary · practitioner
 - domain (by relevance): security/threat · regulatory/compliance · data-integrity · cost/economics · UX/flow · simplicity/YAGNI · scale/ops · testability
 - MANDATORY: task moves money / holds funds / touches auth or custody → include BOTH security AND regulatory.
+- MANDATORY (W7c) when the output is outward-facing (article / README / public post / pitch): add an AUDIENCE
+  lens that reads it AS a senior engineer from the target ecosystem ("would they nod or push back?"), hunting
+  overclaims and absolutes and missing insider nuance. Correctness lenses miss this. Report FIX / SOFTEN / HOLD.
 **DIFFERENTIAL CONTEXT (W1).** Route each DOMAIN lens to the code its concern owns (security→
 auth/keys/custody; regulatory→compliance/money-movement; data-integrity→schema/ledger/tx;
 cost→fees/infra; UX→user flows/errors) using the project-model's `file:line` map, so lenses see
@@ -60,6 +63,11 @@ says what's asserted; (ii) checks every library/SDK/API claim (method names, sig
 config, version behavior) against the installed type defs or official docs (WebFetch) — NOT
 from memory. Strike or correct anything unsupported. This makes both hallucinated "your code
 does X" and invented SDK methods/APIs structurally impossible. Report verified vs struck.
+**W7 currency + apply-now (7a/7b).** Existence is not enough: confirm each SDK/API/symbol is the CURRENT,
+canonical source (official docs + last-published date; renamed / superseded / moved org scope?), name the
+version the code targets, and check WHICH name/ID space a value belongs to before "correcting" it. Any
+rename, drift, or outdated term you surface, fix in the user-visible text (prose/comments/diagrams) THIS
+pass; never defer known staleness.
 **4b. Adversarial check (W5 — decorrelated skeptics).** Pull the draft's load-bearing claims.
 For the top 4, spawn EXACTLY 3 skeptics in a fixed **2× Opus + 1× Sonnet** split (pin via the
 Task `model` param: `opus`/`sonnet`) whose ONLY job is to REFUTE (default "refuted" if uncertain;

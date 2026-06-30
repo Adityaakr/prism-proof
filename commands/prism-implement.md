@@ -83,6 +83,10 @@ capture durable prefs. Global USER layer — separate from the per-repo `.prism/
     verify the method name / signature / options against the package's own type defs in
     `node_modules` (or the official docs for THAT version via WebFetch). Never invent method names,
     config keys, import paths, or CLI flags — fabricated APIs are the #1 coding hallucination.
+  - **W7 currency (7a):** existence is not enough. Confirm the package is the CURRENT, canonical one for
+    this version (not renamed, superseded, or moved org scope), and verify WHICH name/ID space a value lives
+    in (SDK param vs protocol enum vs wire format) before "correcting" it. If you surface a rename or stale
+    term, fix it in the code AND any user-visible comment/string this pass (7b); never defer known staleness.
   - **Don't add a dependency that isn't installed** to make code "work" — either it's already a
     dep, or adding it is an explicit, stated decision.
   - If you cannot verify something, mark it UNVERIFIED and check it before writing code on the

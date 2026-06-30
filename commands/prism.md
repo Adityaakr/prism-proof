@@ -152,6 +152,24 @@ CITATION ENFORCEMENT: a load-bearing claim with NO citation is `unverified` by d
 strikes it or demotes it. Print a one-line evidence summary per artifact (e.g. "4 verified, 6 supported,
 1 unverified, 0 contradicted"). Keep to these four tiers; do not invent more.
 
+W7 CURRENCY + AUDIENCE grounding (every command; runs ALONGSIDE the normal grounding check). Correctness
+alone (is it true, does it compile) misses how OUTWARD-FACING work fails.
+- 7a SOURCE CURRENCY (extends grounding). Confirming an SDK/API/symbol EXISTS is not enough; confirm the
+  source is the CURRENT, canonical one: check official docs AND the registry's last-published date; ask "has
+  this been renamed, superseded, or moved org scope?"; name the exact version the code targets and add an
+  "illustrative, version-sensitive (see <docs>)" note when it matters. Colliding name/ID spaces (SDK param
+  vs protocol enum vs wire format) are a classic false-fix: verify WHICH space the code uses, and state the
+  space you checked, before "correcting" a value.
+- 7b APPLY-NOW (never defer known staleness). If a verifier surfaces a rename, drift, or outdated term, fix
+  the USER-VISIBLE text (prose, comments, diagrams) in the SAME pass. Surfaced implies applied; "found but
+  graded low and deferred" just means the user or reviewer finds it later.
+- 7c AUDIENCE LENS (mandatory fan-out lens whenever the artifact is outward-facing: article, README, docs,
+  public post, pitch). Read the work AS a senior engineer from the exact ecosystem it targets: "would they
+  nod, or push back?" It owns: overclaims/absolutes ("nothing to deploy", "fully private", "X disappears",
+  "no Y needed") scoped precisely; missing insider nuance (public-vs-private, trust boundaries,
+  liveness/observability, testnet caveats); anything that signals the author does not actually use the
+  thing. Correctness lenses do NOT cover this. Report findings as FIX / SOFTEN / HOLD (with why).
+
 RETRIEVAL (locate before you read; never dump). Find code with ripgrep (Grep/Glob, always fresh) and
 the Repo Map first. For symbol lookups, shell out `ctags` on demand into the scratch dir for this run;
 never commit an index (a committed index goes stale the moment code changes). Read SPANS, not whole

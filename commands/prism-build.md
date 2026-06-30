@@ -53,8 +53,11 @@ Run a full deliberation on "what architecture + stack for this?":
 - Draft the architecture in EXPERT FORMAT: 1. Recommendation 2. Why 3. Steelman of the
   rejected stack 4. Assumptions & falsifiers 5. Open questions for the human 6. Grounded (cite sources for external claims).
 - VERIFY: (a) grounding — any claim about existing code cites `file:line`/library docs and a verifier
-  re-opens it to confirm; (b) adversarial (W5) — top 4 claims × **2× Opus + 1× Sonnet** skeptics
-  (cross-tier; version axis unavailable). Label survivors `grounded` vs `cross-tier-survived`;
+  re-opens it to confirm; **W7 currency (7a):** also confirm each SDK/framework is the CURRENT, canonical
+  source (official docs + last-published date; renamed / superseded / moved org scope?) and name the version
+  the stack targets, so the architecture is not built on a deprecated package. Any staleness you surface, fix
+  in the user-visible text this pass (7b). (b) adversarial (W5) — top 4 claims × **2× Opus + 1× Sonnet**
+  skeptics (cross-tier; version axis unavailable). Label survivors `grounded` vs `cross-tier-survived`;
   grounding OUTRANKS cross-tier survival; never call it "cross-model".
 
 ## Phase 3 — DECOMPOSE into a phased roadmap
