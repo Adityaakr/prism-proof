@@ -2,4 +2,10 @@
 
 # Personal/runtime memory — never commit a real profile (use user.example.md as the template)
 user.md
-.prism/
+
+# Project memory: keep most of .prism/ local, but SHARE the code-truth layer with the team so
+# project understanding compounds across clones. The user profile and per-run traces stay private.
+.prism/*
+!.prism/project-model.md
+!.prism/repo-map.md
+.prism/runs/

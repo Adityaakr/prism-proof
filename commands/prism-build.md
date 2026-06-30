@@ -22,6 +22,11 @@ feed its Architecture / Invariants / Danger zones / Lessons into the build.
   decides choices the project hasn't already made. Never introduce a second framework/styling system
   or drop raw HTML/CSS/JS into a typed component project. Matching means the QUALITY bar too (the repo's
   naming, function-size, comment, and error-handling patterns), not just the tooling.
+- **Monorepo → detect PER PACKAGE (nearest-manifest-wins).** If the repo has multiple packages
+  (`pnpm-workspace.yaml`, `turbo.json`, `nx.json`, a `packages/`/`apps/`/`crates/` layout, or multiple
+  `package.json`/`Cargo.toml`/`go.mod`), each package is its own stack. Map package roots first, then
+  architect and build each against its OWN toolchain and test runner. A TS frontend next to Rust
+  contracts is two stacks in one repo, not one. Never impose a single global stack across packages.
 - **True greenfield → free choice.** No existing conventions; Phase 2 picks the stack from scratch.
   Because there is no exemplar to conform to, SET the code-craft standard now and make it the project's
   convention: intent-revealing names, one job per function, no dead code, comments explain why, doc

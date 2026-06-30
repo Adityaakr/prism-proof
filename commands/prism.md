@@ -106,6 +106,11 @@ zones/Lessons) so you build on accumulated understanding instead of re-deriving 
 violate a recorded invariant without flagging. After a PLAN/BUILD run, update it: new
 invariants (cited), a Decision-log entry, assumptions to be checked later. UNDERSTAND runs
 maintain it as their main artifact. This is what makes prism compound on THIS project.
+WRITE PROTOCOL (avoid clobbering): one command updates memory at a time. Before writing
+`.prism/project-model.md`, append to the right SECTION rather than rewriting the file, and re-read it
+immediately before editing so a concurrent run's update is not lost. If `.prism/.memory.lock` exists and
+is fresh (under ~10 min), another run is writing: wait or warn, do not blind-overwrite. Code-truth layers
+(`project-model.md`, `repo-map.md`) are git-shared; `user.md` and `.prism/runs/` stay machine-private.
 
 VERIFY — two checks. (a) GROUNDING: every factual claim is checked against a SOURCE, never
 recall. Claims about the code cite `file:line` and a verifier re-opens them; claims about a
@@ -135,6 +140,24 @@ counterexample required):
   > shared-lineage blind spots. Treat cross-tier survival as weaker evidence than grounding.
 Report survivors/casualties with their labels.
 
+EVIDENCE TIERS (surface a tier on every load-bearing claim). Collapse the labels above into four
+tiers a reader actually acts on, highest to lowest:
+- `verified`: a command ran, a test passed, or a verifier re-opened the cited `file:line` and confirmed
+  it (the strongest form of `grounded`).
+- `supported`: an official doc, installed type def, or a fresh cited memory entry asserts it, not
+  independently re-checked (includes `cross-tier-survived`; weaker than verified).
+- `unverified`: inferred from verified facts, or plausible but unchecked. Label it; never present as fact.
+- `contradicted`: evidence is against it. Strike it or flag it loudly.
+CITATION ENFORCEMENT: a load-bearing claim with NO citation is `unverified` by definition; the verifier
+strikes it or demotes it. Print a one-line evidence summary per artifact (e.g. "4 verified, 6 supported,
+1 unverified, 0 contradicted"). Keep to these four tiers; do not invent more.
+
+RETRIEVAL (locate before you read; never dump). Find code with ripgrep (Grep/Glob, always fresh) and
+the Repo Map first. For symbol lookups, shell out `ctags` on demand into the scratch dir for this run;
+never commit an index (a committed index goes stale the moment code changes). Read SPANS, not whole
+files: do not load a file over ~400 lines without a span target. On a miss, fall back grep then scoped
+read, and log which path served the lookup. This keeps token cost scaled to the task, not the repo size.
+
 ANTI-HALLUCINATION (all commands) — prefer reading over recalling. If a fact is checkable
 (a symbol, an API signature, a file path, a config key, a version, a price), CHECK it before
 asserting. State confidence honestly and label anything UNVERIFIED rather than presenting a
@@ -143,6 +166,12 @@ guess as fact. "I don't know, let me look" beats a confident fabrication.
 PERSIST — looped/spec runs only: if a `docs/` (or `docs/plans/`) folder exists, save the
 final output as a NEW numbered markdown file matching the existing naming convention
 (next free number → `NN-<slug>.md`); NEVER overwrite. Print the path. Single-pass: do not write files.
+
+CHECKPOINT (resumability for multi-phase runs). After each phase, write
+`.prism/runs/<runid>/checkpoint.json` (phase, input OIDs, outputs so far, open items, the per-claim
+tier table). A resumed run reads the last checkpoint and re-runs only the unfinished tail. Do NOT build
+a multi-file run log: the Claude Code transcript already records tool calls, and token spend cannot be
+self-reported reliably from inside a prompt. One checkpoint file is the missing piece.
 
 TELEMETRY (W6 — every PLAN/BUILD decision doc AND memory carry a MEASURED block, not prose):
 ```

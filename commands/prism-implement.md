@@ -27,6 +27,12 @@ capture durable prefs. Global USER layer — separate from the per-repo `.prism/
   - **Styling:** `tailwind.config.*` + `className` → Tailwind (use utility classes + the project's design tokens/`shadcn` components, NOT raw inline CSS or a new `<style>`); `*.module.css` → CSS modules; styled-components/emotion → match it. Use the SAME system the project already uses.
   - **Structure & naming:** where components/routes/hooks/utils/types live; file naming (PascalCase vs kebab), default vs named exports, import aliases (`@/…` from tsconfig paths). Mirror them exactly.
   - **Package manager:** `pnpm-lock.yaml`/`yarn.lock`/`package-lock.json` → use the right one (never mix).
+  - **Monorepo (nearest-manifest-wins).** If the repo has multiple packages (`pnpm-workspace.yaml`,
+    `turbo.json`, `nx.json`, `lerna.json`, a `packages/`/`apps/`/`crates/` layout, or multiple
+    `package.json`/`Cargo.toml`/`go.mod`), do NOT assume one stack. Resolve the package that OWNS the
+    file you are touching by walking up to its closest manifest, and use THAT package's language, deps,
+    scripts, and test runner. A TS frontend and a Rust contract in one repo get built and tested with
+    their own toolchains. Run the owning package's checks, not a single global build.
   - **Tooling:** eslint/prettier config (match formatting), test framework (vitest/jest/playwright).
   Read 2–3 representative existing files of the kind you're about to write and copy their shape.
   **HARD RULE:** dropping plain HTML/CSS/JS into a TS/React/Tailwind project is a BUG — match the
