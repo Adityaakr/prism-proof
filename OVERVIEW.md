@@ -122,6 +122,21 @@ acts on: `verified` (a command ran, a test passed, or a verifier re-opened the c
 load-bearing claim with no citation is `unverified` by definition, and each artifact prints a one-line
 evidence summary (e.g. "4 verified, 6 supported, 1 unverified").
 
+**Currency + audience grounding (W7).** Correctness alone (is it true, does it compile) misses how
+OUTWARD-FACING work fails, so W7 runs alongside the normal grounding check on every command:
+- **7a source currency.** Confirming an SDK/API/symbol EXISTS is not enough; confirm it is the CURRENT,
+  canonical source (official docs + the registry's last-published date; renamed, superseded, or moved org
+  scope?), name the version it targets, and verify which name/ID space a value lives in (SDK param vs
+  protocol enum vs wire format) before "correcting" it.
+- **7b apply-now.** A rename or stale term that a verifier surfaces is fixed in the user-visible text the
+  same pass; "found, graded low, deferred" just means the reviewer finds it later.
+- **7c audience lens.** Whenever the artifact is outward-facing (article, README, post, pitch), one lens
+  reads it AS a senior engineer from the target ecosystem: it scopes overclaims and absolutes ("nothing to
+  deploy", "fully private"), adds the insider nuance they expect (public-vs-private, trust boundaries,
+  testnet caveats), and flags anything signaling the author does not actually use the thing. Correctness
+  lenses do not cover this. Findings report as FIX / SOFTEN / HOLD. Lives in `/prism-feedback`,
+  `/prism-write`, and `/prism-plan`; 7a/7b travel with every grounded run.
+
 ### 5e. Memory — two compounding layers
 Prism keeps **two** durable memories with different lifetimes, deliberately kept separate so neither
 pollutes the other:
