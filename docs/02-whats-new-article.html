@@ -132,6 +132,27 @@
     color: var(--muted);
   }
   footer p { margin: 0 0 6px; }
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 1px 8px;
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+  .pill-shipped { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
+  .pill-planned { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .pill-open { background: transparent; color: var(--muted); border: 1px solid var(--muted); }
+  .statuslegend {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted);
+    margin: 14px 0 12px;
+  }
+  .statustable { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 15.5px; }
+  .statustable td { border-top: 1px solid var(--line); padding: 9px 12px 9px 0; vertical-align: top; }
+  .statustable td.st { width: 92px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -149,6 +170,28 @@
       <span>scope: 8 files, 1 new command</span>
     </div>
   </header>
+
+  <section>
+    <h2>Status at a glance</h2>
+    <h3>What is shipped, what is planned, what is still open</h3>
+    <div class="statuslegend">
+      <span><span class="pill pill-shipped">shipped</span> merged to main, in use</span>
+      <span><span class="pill pill-planned">planned</span> designed, not built</span>
+      <span><span class="pill pill-open">open</span> known gap, not addressed</span>
+    </div>
+    <table class="statustable">
+      <tr><td class="st"><span class="pill pill-shipped">shipped</span></td><td>Repo Map: big-codebase sizing gate + structure cache</td></tr>
+      <tr><td class="st"><span class="pill pill-shipped">shipped</span></td><td>Craft floor: clean-code standard in build / implement / ship</td></tr>
+      <tr><td class="st"><span class="pill pill-shipped">shipped</span></td><td>/prism-write: README, summary, comments, grounded HTML article</td></tr>
+      <tr><td class="st"><span class="pill pill-planned">planned</span></td><td>Four-tier evidence ladder + citation enforcement</td></tr>
+      <tr><td class="st"><span class="pill pill-planned">planned</span></td><td>Tiered safety guard (rewrite prism-guard.sh by reversibility)</td></tr>
+      <tr><td class="st"><span class="pill pill-planned">planned</span></td><td>checkpoint.json resume + ripgrep/ctags retrieval</td></tr>
+      <tr><td class="st"><span class="pill pill-planned">planned</span></td><td>Memory shared-vs-private decision, version/drift check, write protocol</td></tr>
+      <tr><td class="st"><span class="pill pill-open">open</span></td><td>Monorepo build orchestration: detected, not handled</td></tr>
+      <tr><td class="st"><span class="pill pill-open">open</span></td><td>Live large-repo validation: not run yet, and it is the real test</td></tr>
+      <tr><td class="st"><span class="pill pill-open">open</span></td><td>Anti-slop and the Repo Map win are inherent soft limits, managed not solved</td></tr>
+    </table>
+  </section>
 
   <section>
     <h2>Context</h2>
@@ -250,7 +293,7 @@
 
   <section>
     <h2>Addition one</h2>
-    <h3><span class="num">01</span>The Repo Map <span class="badge">big codebases</span></h3>
+    <h3><span class="num">01</span>The Repo Map <span class="badge">big codebases</span> <span class="pill pill-shipped">shipped</span></h3>
     <p>Before this, Prism scoped a codebase with one line of prose: break it into parts, send three to six
     explorers, scale to size. On a fifty-file project that is fine. On a fifteen-hundred-file monorepo it
     is guesswork. There was also a promised "file concern map" that routed each lens to the code it owns,
@@ -277,7 +320,7 @@
 
   <section>
     <h2>Addition two</h2>
-    <h3><span class="num">02</span>The Craft floor <span class="badge">clean code</span></h3>
+    <h3><span class="num">02</span>The Craft floor <span class="badge">clean code</span> <span class="pill pill-shipped">shipped</span></h3>
     <p>Prism was good at matching a codebase that already exists. It detected the language, the framework,
     the naming, and the linter, and it conformed. The gap showed up on greenfield work: with nothing to
     match, there was no standard at all. Code could compile, pass its tests, conform structurally, and
@@ -304,7 +347,7 @@
 
   <section>
     <h2>Addition three</h2>
-    <h3><span class="num">03</span>The /prism-write command <span class="badge">human docs</span></h3>
+    <h3><span class="num">03</span>The /prism-write command <span class="badge">human docs</span> <span class="pill pill-shipped">shipped</span></h3>
     <p>No command wrote documents for a person to read. Prism summarized diffs into its own memory, but it
     never produced a README, a change summary, or an article. <code>/prism-write</code> fills that gap. It
     has four modes picked from the target: a grounded README, a change summary, a retroactive comment pass,
@@ -342,7 +385,7 @@
 
   <section>
     <h2>What is next</h2>
-    <h3>The production-readiness plan, and what a critic pass cut from it</h3>
+    <h3>The production-readiness plan, and what a critic pass cut from it <span class="pill pill-planned">planned</span></h3>
     <p>The next body of work is making Prism dependable in real engineering use, planned in
     <code>docs/03-prism-production-readiness.md</code>. The honest framing is the same one that shapes
     everything here: Prism is markdown playbooks plus hooks plus memory, not a runtime, so production-grade
@@ -371,7 +414,7 @@
 
   <section>
     <h2>Honest limits</h2>
-    <h3>What is not done</h3>
+    <h3>What is not done <span class="pill pill-open">open</span></h3>
     <ul class="tight">
       <li>Monorepo build orchestration is detected but not handled. It is the next slice.</li>
       <li>The Repo Map saves real work only on repeated runs, and its win is modest. Building a faithful map
