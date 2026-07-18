@@ -62,3 +62,28 @@ Verified · Evidence · Tests · Assumptions · Risks · Verdict (accept | human
 | **3 · Web dashboard** | Proof + model-comparison console | planned |
 | **4 · Doc reframe** | README/OVERVIEW headline → proof layer | planned |
 
+### Phase 0 (done on this branch)
+- `schema/proof-packet.schema.json` — the six-question contract + telemetry (models per role,
+  cost per provider, cross-model decorrelation label).
+- `commands/prism-verify.md` — independent proof layer: assemble case file → risk-size →
+  ground every claim → skeptic panel (cross-model if available, else cross-tier) → run tests →
+  verdict → emit markdown + `.prism/runs/<id>.json`.
+- `renderer/proof-packet.html` — self-contained, theme-aware renderer; **reused verbatim** as the
+  dashboard's packet view (single source of truth for how a packet looks).
+
+### Phase 0.5 — Prism Core (the model-agnostic lift)
+- Provider adapter interface + implementations: Anthropic, OpenAI/Codex, OpenAI-compatible
+  (covers Ollama / vLLM / OpenRouter → open models).
+- `prism.config.{json,yaml}` mapping roles → models, e.g.:
+  ```yaml
+  draft: claude-opus-4-8
+  judge: claude-sonnet-5
+  grounding_verifier: qwen2.5-coder:32b   # cheap/local
+  skeptics: [claude-opus-4-8, gpt-5-codex, qwen2.5-coder:32b]  # genuine cross-model
+  ```
+  Ship a `local` profile (all Ollama, zero keys) and a `balanced` profile.
+- Core owns control flow (deterministic fan-out/judge/verify/loop) and emits the Proof Packet.
+- **Open question (user's call): Core language.** Lean **TypeScript** — one toolchain across
+  Core + MCP + dashboard, MCP SDK is TS-first; adapters hit any OpenAI-compatible endpoint so
+  open models work regardless. Alt: Python (heavier local-model ecosystem).
+
