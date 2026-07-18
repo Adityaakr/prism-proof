@@ -122,3 +122,19 @@ export interface Telemetry {
   };
 }
 
+export interface ProofPacket {
+  schemaVersion: "1.0";
+  id: string;
+  createdAt?: string;
+  command?: "verify" | "plan" | "build" | "implement" | "feedback";
+  task: string;
+  diff?: DiffInfo;
+  verdict: Verdict;
+  verified: Verified;
+  evidence: Evidence;
+  tests: Tests;
+  assumptions: Assumption[];
+  risks: Risk[];
+  claims?: Claim[];
+  telemetry?: Telemetry;
+}
