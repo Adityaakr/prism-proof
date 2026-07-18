@@ -133,3 +133,28 @@ export function citationHolds(repoRoot: string, citation?: string): boolean {
   const end = parseInt(m[3] ?? m[2], 10);
   if (!Number.isFinite(start) || start < 1 || end < start) return false;
 
+  let root: string;
+  try {
+    root = fs.realpathSync(path.resolve(repoRoot));
+  } catch {
+    return false;
+  }
+  const target = path.resolve(root, rel);
+  // boundary check with a separator guard (blocks /repo-evil and ../ escapes)
+  const relBefore = path.relative(root, target);
+  if (relBefore === "" || relBefore.startsWith("..") || path.isAbsolute(relBefore)) return false;
+
+  let abs: string;
+  try {
+    abs = fs.realpathSync(target); // resolve symlinks, then re-check the boundary
+  } catch {
+    return false;
+  }
+  const relAfter = path.relative(root, abs);
+  if (relAfter.startsWith("..") || path.isAbsolute(relAfter)) return false;
+
+  if (!fs.statSync(abs).isFile()) return false;
+  const content = fs.readFileSync(abs, "utf8");
+  const lineCount = content.length === 0 ? 0 : content.replace(/\n+$/, "").split("\n").length;
+  return end <= lineCount;
+}
