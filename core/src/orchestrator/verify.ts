@@ -170,3 +170,29 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
       if (refutedAny) dissent++;
     }
 
+    // Majority refute (a concrete counterexample) strikes a claim — even a cited one; a
+    // counterexample beats a citation. Grounding outranks *survival*, never *refutation*.
+    const panelSize = config.roles.skeptics.length;
+    for (const claim of top) {
+      const votes = refuteCount.get(claim.id) ?? 0;
+      if (votes * 2 > panelSize) {
+        claim.label = "struck";
+        risks.push({
+          severity: "high",
+          location: claim.citation,
+          description: `Load-bearing claim refuted by ${votes}/${panelSize} skeptics: "${claim.text}"`,
+          category: "correctness",
+        });
+      } else {
+        claim.label = labelSurvivor(claim);
+      }
+    }
+    for (const claim of claims.slice(maxClaims)) claim.label = labelSurvivor(claim);
+
+    const conclusionDiv = panelSize > 0 ? dissent / panelSize : 0;
+    divergence = { score: conclusionDiv, evidence: conclusionDiv, conclusion: conclusionDiv, threshold: 0.3, calibrated: false };
+  } else {
+    // low-risk: no panel. Cited claims are grounded; uncited stay the weaker survivor label.
+    for (const claim of claims) claim.label = labelSurvivor(claim);
+  }
+
