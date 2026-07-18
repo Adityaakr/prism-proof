@@ -18,3 +18,27 @@ export function loadSchema(): object {
   return JSON.parse(fs.readFileSync(schemaPath(), "utf8"));
 }
 
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+/** Validate a packet against the JSON schema — the runtime source of truth. */
+export function validate(packet: unknown): ValidationResult {
+  const ajv = new Ajv2020({ allErrors: true, strict: false });
+  ajv.addFormat("date-time", true); // permissive; we don't need strict date validation
+  const v = ajv.compile(loadSchema());
+  const valid = v(packet) as boolean;
+  const errors = (v.errors ?? []).map((e) => `${e.instancePath || "/"} ${e.message ?? ""}`.trim());
+  return { valid, errors };
+}
+
+/** Write the machine record to .prism/runs/<id>.json and return its path. */
+export function writeRun(repoRoot: string, packet: ProofPacket): string {
+  const dir = path.join(repoRoot, ".prism", "runs");
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, `${packet.id}.json`);
+  fs.writeFileSync(file, JSON.stringify(packet, null, 2) + "\n");
+  return file;
+}
+
