@@ -116,3 +116,33 @@
           "description": "External API/library docs or installed type defs consulted — checked, never recalled from memory.",
           "items": {
             "type": "object",
+            "required": ["source"],
+            "additionalProperties": false,
+            "properties": {
+              "source": { "type": "string", "description": "URL or 'installed types: <pkg>@<version>'." },
+              "claim": { "type": "string", "description": "What this source confirms." }
+            }
+          }
+        },
+        "rules": {
+          "type": "array",
+          "description": "Project rules / invariants (from .prism/project-model.md) this change was checked against.",
+          "items": {
+            "type": "object",
+            "required": ["rule"],
+            "additionalProperties": false,
+            "properties": {
+              "rule": { "type": "string" },
+              "citation": { "type": "string", "description": "file:line the invariant is anchored to." },
+              "status": { "type": "string", "enum": ["upheld", "violated", "n/a"] }
+            }
+          }
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "description": "Q3 — what passed, failed, or never ran. 'not run' is a first-class outcome, never hidden.",
+      "required": ["passed", "failed", "notRun"],
+      "additionalProperties": false,
+      "properties": {
