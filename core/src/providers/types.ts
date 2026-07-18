@@ -23,3 +23,15 @@ export interface CompletionRequest {
   role?: string;
 }
 
+export interface Usage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface CompletionResult {
+  text: string;
+  model: string;
+  provider: string;
+  usage?: Usage;
+}
+
