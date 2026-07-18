@@ -127,3 +127,46 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
   const citationValid = new Map<string, boolean>();
   for (const c of claims) citationValid.set(c.id, citationHolds(repoRoot, c.citation));
 
+  const survivedLabel: ClaimLabel = config.decorrelation === "cross-model" ? "cross-model-survived" : "cross-tier-survived";
+  const labelSurvivor = (c: Claim): ClaimLabel => (citationValid.get(c.id) ? "grounded" : survivedLabel);
+
+  // ---- 3. Skeptic panel (only if risk ≥ medium) — votes on ALL load-bearing claims
+  const changeRisk = assessRisk(diff, risks, evidence);
+  const skepticVotes: SkepticVote[] = [];
+  let divergence: Telemetry["divergence"] | undefined;
+  const maxClaims = input.maxSkepticClaims ?? 4;
+  const runPanel = changeRisk !== "low" && claims.length > 0;
+
+  if (runPanel) {
+    const top = claims.slice(0, maxClaims);
+    const refuteCount = new Map<string, number>();
+    let dissent = 0;
+    for (const spec of config.roles.skeptics) {
+      const { kind, model } = parseModelSpec(spec);
+      const provider: Provider = providerFor(spec, overrides);
+      let refutedAny = false;
+      for (const claim of top) {
+        const res = await provider.complete(model, {
+          role: "skeptic",
+          temperature: 0,
+          system:
+            "You are a Prism skeptic. Your ONLY job is to REFUTE the claim with a concrete counterexample. " +
+            "Default to refuting when uncertain. Return STRICT JSON: {vote:'refute'|'uphold', reason}.",
+          messages: [{ role: "user", content: `CLAIM: ${claim.text}\nCITATION: ${claim.citation ?? "none"}\n\nDIFF:\n${diff.patch.slice(0, 12000)}` }],
+        });
+        record(res);
+        let vote: "refute" | "uphold" = "uphold";
+        try {
+          vote = extractJson<{ vote?: string }>(res.text).vote === "refute" ? "refute" : "uphold";
+        } catch {
+          vote = "uphold";
+        }
+        if (vote === "refute") {
+          refuteCount.set(claim.id, (refuteCount.get(claim.id) ?? 0) + 1);
+          refutedAny = true;
+        }
+      }
+      skepticVotes.push({ model, provider: kindToProviderEnum(kind), vote: refutedAny ? "refute" : "uphold" });
+      if (refutedAny) dissent++;
+    }
+
