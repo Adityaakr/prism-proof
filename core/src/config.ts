@@ -27,3 +27,34 @@ export interface ResolvedConfig {
   baseUrls: Record<string, string>;
 }
 
+/** Built-in profiles. `mock` (zero-key, deterministic) is the safe default. */
+export const BUILTIN_PROFILES: Record<string, RoleMap> = {
+  mock: {
+    draft: "mock:mock",
+    judge: "mock:mock",
+    groundingVerifier: "mock:mock",
+    skeptics: ["mock:mock", "mock:mock", "mock:mock"],
+  },
+  // Zero API keys — runs entirely on local open models via Ollama.
+  local: {
+    draft: "ollama:qwen2.5-coder:32b",
+    judge: "ollama:qwen2.5-coder:32b",
+    groundingVerifier: "ollama:qwen2.5-coder:7b",
+    skeptics: ["ollama:qwen2.5-coder:32b", "ollama:deepseek-coder-v2:16b", "ollama:llama3.1:8b"],
+  },
+  // Claude-only: the historical cross-TIER split (2× Opus + 1× Sonnet).
+  claude: {
+    draft: "anthropic:claude-opus-4-8",
+    judge: "anthropic:claude-sonnet-5",
+    groundingVerifier: "anthropic:claude-sonnet-5",
+    skeptics: ["anthropic:claude-opus-4-8", "anthropic:claude-opus-4-8", "anthropic:claude-sonnet-5"],
+  },
+  // Genuine cross-MODEL decorrelation — skeptics span three lineages. The flagship.
+  balanced: {
+    draft: "anthropic:claude-opus-4-8",
+    judge: "anthropic:claude-sonnet-5",
+    groundingVerifier: "ollama:qwen2.5-coder:7b",
+    skeptics: ["anthropic:claude-opus-4-8", "openai:gpt-5-codex", "ollama:qwen2.5-coder:32b"],
+  },
+};
+
