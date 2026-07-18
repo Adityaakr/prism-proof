@@ -40,3 +40,17 @@ export function providerFor(spec: string, overrides: ProviderOverrides = {}): Pr
   if (kind === "mock") return overrides.mock ?? new MockProvider();
   if (kind === "anthropic") return new AnthropicProvider({ baseUrl: overrides.baseUrls?.anthropic });
 
+  const preset = OPENAI_COMPAT_DEFAULTS[kind];
+  const baseUrl = overrides.baseUrls?.[kind] ?? preset?.baseUrl;
+  if (!baseUrl) {
+    throw new Error(
+      `Unknown provider kind "${kind}". Known: mock, anthropic, ${Object.keys(OPENAI_COMPAT_DEFAULTS).join(", ")}. ` +
+        `For a custom OpenAI-compatible endpoint, add it under config.baseUrls.`
+    );
+  }
+  return new OpenAICompatibleProvider({ name: kind, baseUrl, apiKeyEnv: preset?.apiKeyEnv });
+}
+
+export function providerKind(spec: string): string {
+  return parseModelSpec(spec).kind;
+}
