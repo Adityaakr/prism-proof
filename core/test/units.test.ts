@@ -22,3 +22,41 @@ describe("model specs", () => {
   });
 });
 
+describe("decorrelation axis", () => {
+  it("labels cross-model when lineages differ", () => {
+    expect(decorrelationOf(["anthropic:opus", "openai:gpt", "ollama:qwen"])).toBe("cross-model");
+  });
+  it("labels cross-tier for same-lineage panels", () => {
+    expect(decorrelationOf(["anthropic:opus", "anthropic:opus", "anthropic:sonnet"])).toBe("cross-tier");
+  });
+  it("labels single-model for a lone skeptic", () => {
+    expect(decorrelationOf(["anthropic:opus"])).toBe("single-model");
+  });
+  it("labels single-model when two specs are identical (no real decorrelation)", () => {
+    expect(decorrelationOf(["anthropic:opus", "anthropic:opus"])).toBe("single-model");
+  });
+});
+
+describe("loadConfig validation (a verification tool must not silently fake a pass)", () => {
+  function tmp(config?: object): string {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "prism-cfg-"));
+    if (config) fs.writeFileSync(path.join(dir, "prism.config.json"), JSON.stringify(config));
+    return dir;
+  }
+  it("throws on an unknown profile instead of falling back to mock", () => {
+    expect(() => loadConfig(tmp(), "balnced")).toThrow(/Unknown profile/);
+  });
+  it("throws on a partial custom profile (missing roles)", () => {
+    const dir = tmp({ profiles: { prod: { draft: "anthropic:claude-opus-4-8" } } });
+    expect(() => loadConfig(dir, "prod")).toThrow(/missing role/);
+  });
+  it("throws on a colon-less spec that would silently route to mock", () => {
+    const dir = tmp({ profiles: { prod: { draft: "gpt-5-codex", judge: "openai:gpt-5", groundingVerifier: "openai:gpt-5", skeptics: ["openai:gpt-5"] } } });
+    expect(() => loadConfig(dir, "prod")).toThrow(/Ambiguous model spec/);
+  });
+  it("accepts a complete custom cross-model profile", () => {
+    const dir = tmp({ profiles: { prod: { draft: "anthropic:opus", judge: "anthropic:sonnet", groundingVerifier: "ollama:qwen", skeptics: ["anthropic:opus", "openai:gpt"] } } });
+    expect(loadConfig(dir, "prod").decorrelation).toBe("cross-model");
+  });
+});
+
