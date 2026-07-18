@@ -39,3 +39,10 @@ export function loadRuns(repoRoot: string): RunSummary[] {
   return runs.sort((a, b) => (b.createdAt ?? b.id).localeCompare(a.createdAt ?? a.id));
 }
 
+const esc = (s: unknown) =>
+  String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] as string));
+
+/** Build the local Prism dashboard — a proof + model-comparison console (not just run history). */
+export function buildDashboard(repoRoot: string): { html: string; runs: number } {
+  const runs = loadRuns(repoRoot);
+
