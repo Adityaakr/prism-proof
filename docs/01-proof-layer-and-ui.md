@@ -106,3 +106,21 @@ Primary GUI now that VS Code is dropped. Contents that earn their place:
    `/prism-prune` staleness flags.
 Reuses `renderer/proof-packet.html` for the packet detail view.
 
+## Assumptions & falsifiers
+- Assumes MCP is available in the target hosts (true for Claude Code/Codex/Cursor today).
+- Assumes open models via Ollama/vLLM are strong enough to be useful skeptics/grounding verifiers —
+  **to be measured by `/prism-eval` on the multi-provider config**; if they're not, the local
+  profile becomes "draft/judge on frontier, cheap grounding only" rather than all-local.
+- Cross-model helps only if lineages genuinely disagree — the divergence metric + dashboard
+  model-comparison view are the falsifier.
+
+## Open questions for the human
+1. Prism Core language: **TypeScript** (recommended) vs Python.
+2. Dashboard hosting: local-first (reads `.prism/runs/`) vs hosted team service — start local?
+3. Which open model(s) to default the `local` profile to (Qwen2.5-Coder / DeepSeek / Llama)?
+
+## Telemetry
+- divergence: n/a (planning doc, no fan-out run)
+- models: draft=opus (this planning session) · skeptics=n/a
+- decision: proof-layer reframe + model-agnostic Core + MCP/CLI distribution + dashboard console;
+  VS Code dropped. Phase 0 + renderer shipped on `feat/proof-layer-and-model-agnostic`.
