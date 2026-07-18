@@ -60,3 +60,15 @@ describe("loadConfig validation (a verification tool must not silently fake a pa
   });
 });
 
+describe("citationHolds (real grounding re-open)", () => {
+  it("is true only when the cited path:line exists in the repo", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "prism-cite-"));
+    fs.writeFileSync(path.join(dir, "a.ts"), "one\ntwo\nthree\n");
+    expect(citationHolds(dir, "a.ts:2")).toBe(true);
+    expect(citationHolds(dir, "a.ts:999")).toBe(false);
+    expect(citationHolds(dir, "missing.ts:1")).toBe(false);
+    expect(citationHolds(dir, undefined)).toBe(false);
+    expect(citationHolds(dir, "../escape.ts:1")).toBe(false);
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
