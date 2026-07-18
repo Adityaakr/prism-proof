@@ -83,3 +83,11 @@ async function main() {
     }
   );
 
+  await server.connect(new StdioServerTransport());
+  console.error("prism MCP server running on stdio (tool: prism_verify)");
+}
+
+main().catch((e) => {
+  console.error(`prism-mcp: ${e?.message ?? e}`);
+  process.exit(1);
+});
