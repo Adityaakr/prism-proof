@@ -111,3 +111,32 @@ describe("verify — verdicts", () => {
     expect(packet.verdict.decision).toBe("block");
   });
 
+  it("a refuted claim is struck even with a valid citation (a counterexample beats a citation)", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({
+        claims: [groundedClaim],
+        risks: [{ severity: "medium", location: "src/pay.ts:5", description: "unclear", category: "correctness" }],
+        skeptic: JSON.stringify({ vote: "refute" }),
+      }),
+      testResult: greenTests, id: "t-ground", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.claims?.[0].label).toBe("struck");
+    expect(packet.verdict.decision).toBe("block");
+  });
+
+  it("grounding outranks SURVIVAL: a cited claim that survives the panel is labelled grounded", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({
+        claims: [groundedClaim],
+        risks: [{ severity: "medium", location: "src/pay.ts:5", description: "x", category: "correctness" }],
+        skeptic: JSON.stringify({ vote: "uphold" }),
+      }),
+      testResult: greenTests, id: "t-ground2", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.claims?.[0].label).toBe("grounded");
+  });
+
