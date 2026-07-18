@@ -66,3 +66,20 @@ async function main() {
     process.exit(1);
   }
 
+  const server = new McpServer({ name: "prism", version: "0.1.0" });
+
+  server.tool(
+    "prism_verify",
+    "Independently verify a code diff (proof layer): ground every claim against the live repo, run a cross-model skeptic panel, and return a Proof Packet with an accept/human-review/block verdict.",
+    VERIFY_INPUT_SCHEMA,
+    async (args: any) => {
+      const { packet, jsonPath, htmlPath } = await runVerify(args);
+      return {
+        content: [
+          { type: "text", text: `VERDICT: ${packet.verdict.decision} — ${packet.verdict.rationale}\nPacket: ${jsonPath}\nRendered: ${htmlPath}` },
+          { type: "text", text: JSON.stringify(packet) },
+        ],
+      };
+    }
+  );
+
