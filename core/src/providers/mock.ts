@@ -54,3 +54,9 @@ export class MockProvider implements Provider {
   };
 }
 
+function stripUndefined(o: Record<string, string | undefined>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of Object.keys(o)) if (o[k] !== undefined) out[k] = o[k] as string;
+  return out;
+}
+
