@@ -58,3 +58,13 @@ export const BUILTIN_PROFILES: Record<string, RoleMap> = {
   },
 };
 
+/** Decide the decorrelation axis from the skeptic pool. Keys on the FULL spec (kind+model),
+ *  so two identical models are correctly reported as no decorrelation, not a tier split. */
+export function decorrelationOf(skeptics: string[]): Decorrelation {
+  const distinct = new Set(skeptics);
+  if (distinct.size <= 1) return "single-model";
+  const kinds = new Set(skeptics.map(providerKind));
+  if (kinds.size > 1) return "cross-model"; // different lineages = strongest
+  return "cross-tier"; // same lineage, different models/tiers
+}
+
