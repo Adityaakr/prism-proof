@@ -178,3 +178,34 @@
     "<strong>Docs / types checked</strong>" + list(ev.docs, function (d) { return "<span class='mono'>" + esc(d.source) + "</span>" + (d.claim ? ' <span class="muted">— ' + esc(d.claim) + "</span>" : ""); }) +
     "<strong>Rules / invariants</strong>" + list(ev.rules, function (r) { return esc(r.rule) + " " + (r.citation ? loc(r.citation) : "") + ' <span class="muted">[' + esc(r.status || "?") + "]</span>"; }));
 
+  // Q3 Tests
+  var t = p.tests || {};
+  html += sec("Tests", "Q3",
+    (t.command ? '<div class="muted mono">$ ' + esc(t.command) + "</div>" : "") +
+    "<strong>Passed</strong>" + list(t.passed, esc) +
+    "<strong>Failed</strong>" + list(t.failed, esc) +
+    "<strong>Not run</strong>" + list(t.notRun, esc));
+
+  // Q4 Assumptions
+  html += sec("Assumptions", "Q4",
+    list(p.assumptions, function (a) { return esc(a.claim) + (a.couldChangeVerdict ? ' <span class="sev high">could change verdict</span>' : "") + (a.howToResolve ? ' <span class="muted">— ' + esc(a.howToResolve) + "</span>" : ""); }));
+
+  // Q5 Risks
+  var risksHtml;
+  if (!risks.length) risksHtml = '<span class="empty">no risks identified</span>';
+  else {
+    risksHtml = '<div class="scroll"><table><thead><tr><th>Severity</th><th>Location</th><th>Category</th><th>Description</th></tr></thead><tbody>';
+    risks.forEach(function (r) {
+      risksHtml += "<tr><td><span class='sev " + esc(r.severity) + "'>" + esc(r.severity) + "</span></td><td>" + loc(r.location) + "</td><td class='muted'>" + esc(r.category || "") + "</td><td>" + esc(r.description) + "</td></tr>";
+    });
+    risksHtml += "</tbody></table></div>";
+  }
+  html += sec("Risks", "Q5", risksHtml);
+
+  // Claims
+  if (p.claims && p.claims.length) {
+    html += sec("Load-bearing claims", "±", list(p.claims, function (c) {
+      return esc(c.text) + ' <span class="chip ' + esc(c.label) + '">' + esc(c.label) + "</span>" + (c.citation ? " " + loc(c.citation) : "");
+    }));
+  }
+
