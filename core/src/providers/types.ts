@@ -69,3 +69,21 @@ function firstBalanced(s: string, opener: "{" | "["): string | null {
 }
 
 /**
+ * Extract a JSON value from a model's text response, tolerating code fences and prose.
+ * The orchestration prompts always ask for a single JSON OBJECT, so when prose surrounds
+ * the JSON we prefer the first balanced object over a stray leading array — a balanced,
+ * string-aware scan, not a first-bracket/last-bracket grab (which silently returned the
+ * wrong value on inputs like `[1,2] {"verdict":"x"}`).
+ */
+export function extractJson<T = unknown>(text: string): T {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const body = fenced ? fenced[1].trim() : trimmed;
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    const span = firstBalanced(body, "{") ?? firstBalanced(body, "[");
+    if (span) return JSON.parse(span) as T;
+    throw new Error(`Could not parse JSON from model output: ${text.slice(0, 200)}`);
+  }
+}
