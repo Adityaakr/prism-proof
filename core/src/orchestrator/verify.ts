@@ -65,3 +65,41 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
   const overrides = { baseUrls: config.baseUrls, mock: input.mock };
   const usage: Record<string, { tokensIn: number; tokensOut: number }> = {};
 
+  const record = (r: CompletionResult) => {
+    const u = (usage[r.provider] ??= { tokensIn: 0, tokensOut: 0 });
+    u.tokensIn += r.usage?.inputTokens ?? 0;
+    u.tokensOut += r.usage?.outputTokens ?? 0;
+  };
+
+  const caseFile = [
+    `TASK:\n${task}`,
+    `DIFF (${diff.info.filesChanged ?? "?"} files, +${diff.info.insertions ?? 0}/-${diff.info.deletions ?? 0}):`,
+    diff.patch.slice(0, 24000),
+    input.projectRules?.length
+      ? `PROJECT INVARIANTS (must be upheld):\n${input.projectRules.map((r) => `- ${r.rule}${r.citation ? ` (${r.citation})` : ""}`).join("\n")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  // ---- 1. Grounding pass ---------------------------------------------------
+  const gModel = parseModelSpec(config.roles.groundingVerifier);
+  const gProvider = providerFor(config.roles.groundingVerifier, overrides);
+  const gRes = await gProvider.complete(gModel.model, {
+    role: "grounding",
+    system:
+      "You are Prism's grounding verifier. You are INDEPENDENT of the agent that wrote this code. " +
+      "Read the task + diff. Return STRICT JSON only, no prose, with keys: verified {inScope[], outOfScope[]}, " +
+      "evidence {files[{path,lines,why}], docs[{source,claim}], rules[{rule,citation,status}]}, " +
+      "claims [{id,text,citation}] (load-bearing claims the change depends on, each citing file:line), " +
+      "risks [{severity,location,description,category}], assumptions [{claim,couldChangeVerdict,howToResolve}].",
+    messages: [{ role: "user", content: caseFile }],
+  });
+  record(gRes);
+  let g: GroundingOutput = {};
+  try {
+    g = extractJson<GroundingOutput>(gRes.text);
+  } catch {
+    g = {};
+  }
+
