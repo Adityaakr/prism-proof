@@ -140,3 +140,16 @@ describe("verify — verdicts", () => {
     expect(packet.claims?.[0].label).toBe("grounded");
   });
 
+  it("emits telemetry with model roles and decorrelation", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      // non-grounded claim + medium risk => the skeptic panel runs and records votes
+      mock: mockScript({ claims: [badClaim], risks: [{ severity: "medium", location: "src/pay.ts:5", description: "x", category: "correctness" }] }),
+      testResult: greenTests, id: "t-tel", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.telemetry?.models?.decorrelation).toBeDefined();
+    expect(packet.telemetry?.models?.skeptics?.length).toBeGreaterThan(0);
+    expect(packet.telemetry?.cost).toBeDefined();
+  });
+});
