@@ -46,3 +46,19 @@ the native Claude Code slash commands stay as the no-install premium path *along
                             Codex, any client)
 ```
 
+The **Proof Packet JSON** (`schema/proof-packet.schema.json`) is the provider-neutral output
+every adapter produces and every UI renders. Answers six questions:
+Verified · Evidence · Tests · Assumptions · Risks · Verdict (accept | human-review | block).
+
+## Roadmap
+
+| Phase | Ships | Status |
+|---|---|---|
+| **0 · Proof Packet contract + `/prism-verify`** | The proof layer + JSON spine | ✅ this branch |
+| **0.5 · Prism Core** | Model-agnostic engine + provider adapters + `prism.config` (role→model) | planned |
+| **1 · HTML Proof Packet artifact** | Shareable, legible proof page | ✅ this branch (renderer) |
+| **2 · MCP server + CLI + Codex integ + git hooks** | Prism in any host / any model | planned |
+| ~~VS Code extension~~ | dropped per user | — |
+| **3 · Web dashboard** | Proof + model-comparison console | planned |
+| **4 · Doc reframe** | README/OVERVIEW headline → proof layer | planned |
+
