@@ -18,3 +18,19 @@ export function parseModelSpec(spec: string): { kind: string; model: string } {
   return { kind: spec.slice(0, i), model: spec.slice(i + 1) };
 }
 
+export interface ProviderOverrides {
+  /** custom base URLs per kind, e.g. { openrouter: "https://openrouter.ai/api/v1" } */
+  baseUrls?: Record<string, string>;
+  /** shared MockProvider instance (so tests can inject scripted responses) */
+  mock?: MockProvider;
+}
+
+const OPENAI_COMPAT_DEFAULTS: Record<string, { baseUrl: string; apiKeyEnv?: string }> = {
+  openai: { baseUrl: "https://api.openai.com/v1", apiKeyEnv: "OPENAI_API_KEY" },
+  ollama: { baseUrl: "http://localhost:11434/v1" },
+  vllm: { baseUrl: "http://localhost:8000/v1" },
+  openrouter: { baseUrl: "https://openrouter.ai/api/v1", apiKeyEnv: "OPENROUTER_API_KEY" },
+  lmstudio: { baseUrl: "http://localhost:1234/v1" },
+  together: { baseUrl: "https://api.together.xyz/v1", apiKeyEnv: "TOGETHER_API_KEY" },
+};
+
