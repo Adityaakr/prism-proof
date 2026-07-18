@@ -264,3 +264,29 @@ function assessRisk(diff: ResolvedDiff, risks: Risk[], evidence: Evidence): "low
   return "low";
 }
 
+function decideVerdict(x: {
+  claims: Claim[];
+  risks: Risk[];
+  tests: Tests;
+  assumptions: Assumption[];
+  evidence: Evidence;
+}): ProofPacket["verdict"] {
+  const highRisk = x.risks.some((r) => r.severity === "high" || r.severity === "critical");
+  const failing = x.tests.failed.length > 0;
+  const struck = x.claims.some((c) => c.label === "struck");
+  const ruleViolated = (x.evidence.rules ?? []).some((r) => r.status === "violated");
+
+  if (highRisk || failing || struck || ruleViolated) {
+    const why: string[] = [];
+    if (failing) why.push(`${x.tests.failed.length} test(s) failing`);
+    if (highRisk) why.push("a high/critical risk");
+    if (struck) why.push("a load-bearing claim was refuted");
+    if (ruleViolated) why.push("a project invariant is violated");
+    return { decision: "block", rationale: `Blocked: ${why.join(", ")}. This change is not safe to merge as-is.`, confidence: "high" };
+  }
+
+  const allGrounded = x.claims.length > 0 && x.claims.every((c) => c.label === "grounded");
+  const testsGreen = x.tests.passed.length > 0 && x.tests.failed.length === 0;
+  const mediumRisk = x.risks.some((r) => r.severity === "medium");
+  const openAssumption = x.assumptions.some((a) => a.couldChangeVerdict);
+
