@@ -234,3 +234,33 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
   };
 }
 
+/** Keep caller-supplied invariants as ground truth; add model-only rules; and propagate a
+ *  model-detected violation onto a matching caller rule so the block condition can fire. */
+function mergeRules(caller?: Evidence["rules"], model?: Evidence["rules"]): Evidence["rules"] {
+  const out = (caller ?? []).map((r) => ({ ...r }));
+  const byText = new Map(out.map((r) => [r.rule, r] as const));
+  for (const r of model ?? []) {
+    const existing = byText.get(r.rule);
+    if (existing) {
+      if (r.status === "violated") existing.status = "violated";
+    } else {
+      const copy = { ...r };
+      out.push(copy);
+      byText.set(r.rule, copy);
+    }
+  }
+  return out;
+}
+
+function assessRisk(diff: ResolvedDiff, risks: Risk[], evidence: Evidence): "low" | "medium" | "high" {
+  if (risks.some((r) => r.severity === "high" || r.severity === "critical")) return "high";
+  if ((evidence.rules ?? []).some((r) => r.status === "violated")) return "high";
+  const sensitive =
+    /(auth|login|session|token|key|secret|custody|pay|payment|ledger|balance|transfer|migrat|schema|admin|role|permission|wallet|withdraw|deposit|fund|swap|mint|seed|mnemonic|signer|signature|private|credential|password)/i;
+  if (diff.files.some((f) => sensitive.test(f.path))) return "high";
+  if (risks.some((r) => r.severity === "medium")) return "medium";
+  const churn = (diff.info.insertions ?? 0) + (diff.info.deletions ?? 0);
+  if (churn > 60 || (diff.info.filesChanged ?? 0) > 3) return "medium";
+  return "low";
+}
+
