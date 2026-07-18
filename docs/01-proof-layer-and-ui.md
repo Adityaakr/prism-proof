@@ -22,3 +22,27 @@ the VS Code extension.
 - MCP is the portability layer: one engine, many hosts, no per-host prompt forks.
 - A local-only (all-Ollama) profile lets devs run the whole proof layer with zero API keys.
 
+## Steelman of the rejected option (just port the prompts per host)
+Cheaper, keeps the 10-second zero-install copy-in that is a real strength. But a raw open model
+has **no agent host**, so prompt-porting structurally cannot reach open models, and it forces N
+maintained command copies that drift. It fails the model-agnostic requirement. Mitigation we keep:
+the native Claude Code slash commands stay as the no-install premium path *alongside* Core.
+
+## Architecture
+
+```
+                 ┌───────────────── PRISM CORE (engine) ─────────────────┐
+                 │  orchestration: fan-out → divergence → judge →         │
+                 │  verify → loop → Proof Packet JSON  (the spine)        │
+                 └───────────────┬───────────────────────────────────────┘
+                                 │  Provider adapters (role → model)
+        ┌────────────────────────┼────────────────────────┐
+   Anthropic (Claude)     OpenAI / Codex (GPT)     OpenAI-compatible
+                                                   (Ollama / vLLM / OpenRouter → open models)
+                                 │
+        ┌────────────────────────┼────────────────────────┐
+   CLI  `prism verify`     MCP server            Native Claude Code commands
+   (any model, anywhere)   (→ Claude Code,       (kept — zero-install premium)
+                            Codex, any client)
+```
+
