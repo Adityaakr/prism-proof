@@ -46,3 +46,35 @@ const esc = (s: unknown) =>
 export function buildDashboard(repoRoot: string): { html: string; runs: number } {
   const runs = loadRuns(repoRoot);
 
+  const counts = { accept: 0, "human-review": 0, block: 0 } as Record<Decision, number>;
+  const modelStats: Record<string, { refute: number; uphold: number; provider: string }> = {};
+  const providerCost: Record<string, { tokensIn: number; tokensOut: number; usd: number | null }> = {};
+
+  for (const r of runs) {
+    counts[r.decision]++;
+    for (const s of r.packet.telemetry?.models?.skeptics ?? []) {
+      const m = (modelStats[s.model] ??= { refute: 0, uphold: 0, provider: s.provider ?? "?" });
+      if (s.vote === "refute") m.refute++;
+      else if (s.vote === "uphold") m.uphold++;
+    }
+    for (const c of r.packet.telemetry?.cost?.byProvider ?? []) {
+      const p = (providerCost[c.provider] ??= { tokensIn: 0, tokensOut: 0, usd: 0 });
+      p.tokensIn += c.tokensIn ?? 0;
+      p.tokensOut += c.tokensOut ?? 0;
+      p.usd = p.usd == null || c.usd == null ? null : p.usd + (c.usd ?? 0);
+    }
+  }
+
+  const queueRows = runs
+    .map(
+      (r) => `<tr>
+      <td><span class="badge ${r.decision}">${esc(r.decision.replace("-", " "))}</span></td>
+      <td><a href="runs/${esc(r.id)}.html">${esc(r.id)}</a></td>
+      <td>${esc(r.task).slice(0, 90)}</td>
+      <td>${r.highRisks || ""}</td>
+      <td class="mono">${esc(r.decorrelation ?? "")}</td>
+      <td class="mono">${r.costUsd == null ? "—" : "$" + r.costUsd}</td>
+    </tr>`
+    )
+    .join("");
+
