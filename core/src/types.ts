@@ -22,3 +22,34 @@ export interface DiffInfo {
   deletions?: number;
 }
 
+export interface Verdict {
+  decision: Decision;
+  rationale: string;
+  confidence?: "low" | "medium" | "high";
+}
+
+export interface Verified {
+  inScope: string[];
+  outOfScope: string[];
+}
+
+export interface EvidenceFile {
+  path: string;
+  lines: string;
+  why?: string;
+}
+export interface EvidenceDoc {
+  source: string;
+  claim?: string;
+}
+export interface EvidenceRule {
+  rule: string;
+  citation?: string;
+  status?: "upheld" | "violated" | "n/a";
+}
+export interface Evidence {
+  files: EvidenceFile[];
+  docs?: EvidenceDoc[];
+  rules?: EvidenceRule[];
+}
+
