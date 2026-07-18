@@ -41,3 +41,27 @@ export interface VerifyInput {
   maxSkepticClaims?: number;
 }
 
+interface GroundingOutput {
+  verified?: Partial<Verified>;
+  evidence?: Partial<Evidence>;
+  claims?: { id?: string; text: string; citation?: string }[];
+  risks?: Risk[];
+  assumptions?: Assumption[];
+}
+
+const SEV_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+function kindToProviderEnum(kind: string): SkepticVote["provider"] {
+  if (kind === "anthropic") return "anthropic";
+  if (kind === "openai") return "openai";
+  if (kind === "ollama") return "ollama";
+  if (kind === "mock") return "other";
+  return "openai-compatible";
+}
+
+/** The verify flow: assemble → ground (re-open) → skeptics (if risk ≥ medium) → verdict → packet. */
+export async function verify(input: VerifyInput): Promise<ProofPacket> {
+  const { task, diff, repoRoot, config } = input;
+  const overrides = { baseUrls: config.baseUrls, mock: input.mock };
+  const usage: Record<string, { tokensIn: number; tokensOut: number }> = {};
+
