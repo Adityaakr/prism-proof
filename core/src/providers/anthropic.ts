@@ -16,3 +16,21 @@ export class AnthropicProvider implements Provider {
 
   async complete(model: string, req: CompletionRequest): Promise<CompletionResult> {
     if (!this.apiKey) throw new Error("AnthropicProvider: ANTHROPIC_API_KEY is not set");
+    const res = await fetch(`${this.baseUrl}/v1/messages`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": this.apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: req.maxTokens ?? 2048,
+        temperature: req.temperature ?? 0,
+        system: req.system,
+        messages: req.messages.map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
+    if (!res.ok) {
+      throw new Error(`Anthropic API ${res.status}: ${await res.text()}`);
+    }
