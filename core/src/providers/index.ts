@@ -34,3 +34,9 @@ const OPENAI_COMPAT_DEFAULTS: Record<string, { baseUrl: string; apiKeyEnv?: stri
   together: { baseUrl: "https://api.together.xyz/v1", apiKeyEnv: "TOGETHER_API_KEY" },
 };
 
+/** Build a Provider for a model spec's kind. Model-agnostic dispatch lives here. */
+export function providerFor(spec: string, overrides: ProviderOverrides = {}): Provider {
+  const { kind } = parseModelSpec(spec);
+  if (kind === "mock") return overrides.mock ?? new MockProvider();
+  if (kind === "anthropic") return new AnthropicProvider({ baseUrl: overrides.baseUrls?.anthropic });
+
