@@ -151,3 +151,22 @@ verify options:
   --no-render                skip writing the HTML packet
   --json                     print the packet JSON to stdout
 
+Exit codes (for CI gating): 0 accept · 1 block · 3 human-review · 2 usage error
+`);
+}
+
+async function main() {
+  const { _, flags } = parseArgs(process.argv.slice(2));
+  const cmd = _[0] ?? "help";
+  switch (cmd) {
+    case "verify": return cmdVerify(flags);
+    case "dashboard": return cmdDashboard(flags);
+    case "version": return console.log(require("../package.json").version);
+    default: return help();
+  }
+}
+
+main().catch((e) => {
+  console.error(`prism: ${e?.message ?? e}`);
+  process.exit(2);
+});
