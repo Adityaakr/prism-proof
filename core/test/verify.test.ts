@@ -27,3 +27,31 @@ function diff(patch = "diff --git a/src/pay.ts b/src/pay.ts\n+ small change", fi
   };
 }
 
+const groundedClaim = { id: "c1", text: "the change is correct", citation: "src/pay.ts:3" };
+const badClaim = { id: "c1", text: "the change is correct", citation: "src/does-not-exist.ts:999" };
+
+function mockScript(over: { risks?: any[]; assumptions?: any[]; claims?: any[]; skeptic?: string }) {
+  const grounding = JSON.stringify({
+    verified: { inScope: ["src/pay.ts"], outOfScope: [] },
+    evidence: { files: [{ path: "src/pay.ts", lines: "1-20" }], docs: [], rules: [] },
+    claims: over.claims ?? [groundedClaim],
+    risks: over.risks ?? [],
+    assumptions: over.assumptions ?? [],
+  });
+  return new MockProvider({ grounding, skeptic: over.skeptic ?? JSON.stringify({ vote: "uphold" }) });
+}
+
+const greenTests: Tests = { command: "npm test", passed: ["suite"], failed: [], notRun: [] };
+
+describe("verify — verdicts", () => {
+  it("ACCEPT: grounded claim, tests green, no risk", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "small fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({}), testResult: greenTests, id: "t-accept", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.verdict.decision).toBe("accept");
+    expect(packet.claims?.[0].label).toBe("grounded");
+    expect(validate(packet).valid).toBe(true);
+  });
+
