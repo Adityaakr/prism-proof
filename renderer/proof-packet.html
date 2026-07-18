@@ -95,3 +95,31 @@
 <body>
 <div class="wrap" id="app"></div>
 
+<!-- /prism-verify replaces the contents of this block with a run from .prism/runs/<id>.json -->
+<script id="proof-packet" type="application/json">
+{
+  "schemaVersion": "1.0",
+  "id": "2026-07-19-sample",
+  "createdAt": "2026-07-19T12:00:00Z",
+  "command": "verify",
+  "task": "Sample Proof Packet — replace with a real run from .prism/runs/<id>.json",
+  "diff": { "source": "staged", "ref": "HEAD", "filesChanged": 2, "insertions": 40, "deletions": 6 },
+  "verdict": { "decision": "human-review", "rationale": "Grounded and tests pass, but the fee-rounding assumption is unresolved and could change balances.", "confidence": "medium" },
+  "verified": { "inScope": ["balance transfer path", "auth on /pay route"], "outOfScope": ["frontend styling — no behavioural risk"] },
+  "evidence": {
+    "files": [{ "path": "src/ledger.ts", "lines": "42-58", "why": "confirms transfer debits before credit" }],
+    "docs": [{ "source": "installed types: stripe@14.2.0", "claim": "amount is in the smallest currency unit" }],
+    "rules": [{ "rule": "amounts are 6-decimal USDC", "citation": "src/money.ts:12", "status": "upheld" }]
+  },
+  "tests": { "command": "npm test", "passed": ["ledger.spec.ts"], "failed": [], "notRun": ["e2e — needs a live env"] },
+  "assumptions": [{ "claim": "fee rounds half-up", "couldChangeVerdict": true, "howToResolve": "confirm with product spec" }],
+  "risks": [{ "severity": "medium", "location": "src/ledger.ts:51", "description": "rounding direction unspecified", "category": "data-integrity" }],
+  "claims": [{ "id": "c1", "text": "transfer debits before it credits", "label": "grounded", "citation": "src/ledger.ts:44" }],
+  "telemetry": {
+    "divergence": { "score": 0.41, "evidence": 0.52, "conclusion": 0.25, "threshold": 0.30, "calibrated": false },
+    "models": { "draft": "claude-opus-4-8", "judge": "claude-sonnet-5", "decorrelation": "cross-model", "skeptics": [{ "model": "claude-opus-4-8", "provider": "anthropic", "vote": "uphold" }, { "model": "gpt-5-codex", "provider": "openai", "vote": "uphold" }, { "model": "qwen2.5-coder:32b", "provider": "ollama", "vote": "refute" }] },
+    "cost": { "totalUsd": 0.14, "byProvider": [{ "provider": "anthropic", "tokensIn": 8200, "tokensOut": 1400, "usd": 0.12 }, { "provider": "ollama", "tokensIn": 3100, "tokensOut": 600, "usd": 0 }] }
+  }
+}
+</script>
+
