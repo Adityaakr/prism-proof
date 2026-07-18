@@ -86,3 +86,33 @@
         },
         "outOfScope": {
           "type": "array",
+          "items": { "type": "string" },
+          "description": "What was deliberately NOT verified and why (e.g. 'frontend styling — no behavioural risk')."
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Q2 — what was examined. Every code claim must anchor to file:line; every API claim to a doc/type source.",
+      "required": ["files"],
+      "additionalProperties": false,
+      "properties": {
+        "files": {
+          "type": "array",
+          "description": "Exact file:line ranges a verifier re-opened.",
+          "items": {
+            "type": "object",
+            "required": ["path", "lines"],
+            "additionalProperties": false,
+            "properties": {
+              "path": { "type": "string" },
+              "lines": { "type": "string", "description": "e.g. '42' or '42-58'." },
+              "why": { "type": "string", "description": "What this range establishes." }
+            }
+          }
+        },
+        "docs": {
+          "type": "array",
+          "description": "External API/library docs or installed type defs consulted — checked, never recalled from memory.",
+          "items": {
+            "type": "object",
