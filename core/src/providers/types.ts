@@ -68,3 +68,4 @@ function firstBalanced(s: string, opener: "{" | "["): string | null {
   return null;
 }
 
+/**
