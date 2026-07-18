@@ -84,3 +84,21 @@ hardcoded secrets, and leftover debug.
   or a struck load-bearing claim the change depends on.
 When in doubt, prefer `human-review` over `accept`. Never rubber-stamp.
 
+## Step 7 — Emit the Proof Packet
+Write BOTH:
+1. **Human markdown** in the reply — the six sections, verdict badge first, risks by severity,
+   file:line evidence, and the honest "what I did NOT verify".
+2. **Machine record** — `.prism/runs/<id>.json` conforming to `schema/proof-packet.schema.json`
+   (create `.prism/runs/` if missing; `<id>` = today's date + short slug). This is the spine the
+   Prism artifact renderer and web dashboard read — populate `telemetry.models` (who played which
+   role) and `telemetry.cost` so the model-comparison and cost views have data.
+3. **Optional artifact** — if the user asks to "share" or "render the proof", populate
+   `renderer/proof-packet.html` with the JSON and publish it via the Artifact tool (a legible,
+   shareable Proof Packet page — proof, not a chat transcript).
+
+## Always
+- You are independent. If the diff is fine, say so plainly and `accept` — do not manufacture risks.
+- If it's unsafe, `block` and point to the exact `file:line`. The value is legibility: what was
+  checked, which evidence supports it, what's still uncertain, and why it's (un)safe to merge.
+- Print the honest decorrelation axis; never call cross-tier "cross-model".
+- Update the project-model Decision log with the verdict and any new invariant the diff revealed.
