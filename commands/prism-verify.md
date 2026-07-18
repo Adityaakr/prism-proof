@@ -42,3 +42,31 @@ A proof layer that spins up eight agents for a rename is theatre. Classify the c
   data, mainnet) → full grounding + differential skeptic panel + MANDATORY security review.
 State: `Change: <n> files | Risk: low/medium/high | Verification: <what you'll run>`.
 
+## Step 3 — Ground every claim (this is the heart of it)
+For EACH load-bearing claim (from the diff and the agent):
+- **Code claim** → re-open the cited `file:line` in the CURRENT repo and confirm it says what's
+  claimed. If the diff added `X`, read `X` as it now exists — not as described. Struck if unsupported.
+- **API / library claim** → check the INSTALLED version's type defs (`node_modules`, `Cargo.toml`
+  lockfile, etc.) or official docs via WebFetch. Never confirm an API from memory. A wrong method
+  name, signature, or config key is a real risk, not a nitpick.
+- **Rule/invariant** → verify the diff upholds each cited invariant from project memory; a violation
+  is a `high` risk minimum.
+Label each surviving claim `grounded` (re-opened against live code/docs).
+
+## Step 4 — Skeptic panel (only if risk ≥ medium; decorrelate the reviewers)
+Pull the top load-bearing claims; for each, spawn skeptics whose ONLY job is to REFUTE (default
+"refuted" when uncertain; a concrete counterexample is required to strike). Majority (≥2 of 3) kills.
+
+**Decorrelation — use the strongest axis available in THIS environment (record which one):**
+- If Prism Core / a multi-provider setup is available → **cross-MODEL**: skeptics span different
+  model lineages (e.g. Claude + GPT/Codex + an open model). Different lineages share the fewest
+  blind spots. Label survivors `cross-model-survived`. This is the strongest decorrelation.
+- If only Claude Code is available → **cross-TIER**: fixed `2× Opus + 1× Sonnet` via the Task
+  `model` parameter (tier axis only; version axis unavailable). Label survivors `cross-tier-survived`.
+- **GROUNDING OUTRANKS both.** A `grounded` claim is stronger evidence than any survival. Never
+  conflate them. Record the axis actually used in telemetry; never overclaim "cross-model" when
+  only the tier axis ran.
+For high-risk diffs, route domain skeptics to concern-owned code (security → auth/keys/custody,
+data-integrity → schema/ledger, cost → fees/infra) so they see DIFFERENT code, not just read
+different prompts. Print the divergence line as usual.
+
