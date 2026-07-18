@@ -21,3 +21,28 @@ function repoRoot(): string {
   }
 }
 
+const VERIFY_INPUT_SCHEMA = {
+  type: "object",
+  properties: {
+    task: { type: "string", description: "The original task the diff was supposed to accomplish." },
+    source: { type: "string", enum: ["staged", "branch", "commit-range", "worktree", "pr"], default: "staged" },
+    base: { type: "string", description: "Base branch for source=branch." },
+    ref: { type: "string", description: "Range for commit-range, or PR number for source=pr." },
+    profile: { type: "string", description: "mock | local | claude | balanced." },
+  },
+} as const;
+
+async function runVerify(args: any) {
+  const root = repoRoot();
+  const config = loadConfig(root, args.profile);
+  const opts: DiffOptions = { source: args.source ?? "staged", base: args.base, ref: args.ref };
+  const diff = resolveDiff(root, opts);
+  const now = new Date().toISOString();
+  const id = `${now.slice(0, 10)}-mcp-${Math.abs(hash(diff.patch)).toString(36).slice(0, 6)}`;
+  const packet = await verify({ task: args.task ?? "Verify staged change", diff, repoRoot: root, config, now, id });
+  const v = validate(packet);
+  const jsonPath = writeRun(root, packet);
+  const htmlPath = writeHtml(root, packet);
+  return { packet, jsonPath, htmlPath, valid: v.valid, errors: v.errors };
+}
+
