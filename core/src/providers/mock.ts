@@ -60,3 +60,6 @@ function stripUndefined(o: Record<string, string | undefined>): Record<string, s
   return out;
 }
 
+function approxTokens(s?: string): number {
+  return s ? Math.ceil(s.length / 4) : 0;
+}
