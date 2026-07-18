@@ -96,3 +96,23 @@ export function loadConfig(repoRoot: string, profileName?: string): ResolvedConf
     }
   }
 
+  const profile =
+    profileName ?? process.env.PRISM_PROFILE ?? user.defaultProfile ?? "mock";
+
+  const base = BUILTIN_PROFILES[profile];
+  const override = user.profiles?.[profile];
+
+  // A verification tool must never silently fall back to the mock: an unknown profile
+  // name is an error, not "run a fake pass".
+  if (!base && !override) {
+    const known = [...Object.keys(BUILTIN_PROFILES), ...Object.keys(user.profiles ?? {})];
+    throw new Error(`Unknown profile "${profile}". Known: ${known.join(", ")}. Define it in prism.config.json or pass a valid --profile.`);
+  }
+
+  const roles: RoleMap = {
+    draft: override?.draft ?? base?.draft ?? "",
+    judge: override?.judge ?? base?.judge ?? "",
+    groundingVerifier: override?.groundingVerifier ?? base?.groundingVerifier ?? "",
+    skeptics: override?.skeptics ?? base?.skeptics ?? [],
+  };
+
