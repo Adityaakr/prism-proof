@@ -68,3 +68,31 @@ export function decorrelationOf(skeptics: string[]): Decorrelation {
   return "cross-tier"; // same lineage, different models/tiers
 }
 
+/** A spec must name its provider kind explicitly (except the literal `mock`), or a dropped
+ *  colon would silently route a real model to the deterministic mock — a faked verification. */
+export function assertValidSpec(spec: string, profile: string): void {
+  if (!spec || !spec.trim()) throw new Error(`Empty model spec in profile "${profile}".`);
+  const kind = providerKind(spec);
+  if (kind === "") {
+    throw new Error(`Empty provider kind in spec "${spec}" (profile "${profile}"). Use "<kind>:<model>".`);
+  }
+  if (kind === "mock" && spec !== "mock" && !spec.startsWith("mock:")) {
+    throw new Error(
+      `Ambiguous model spec "${spec}" in profile "${profile}": missing provider kind. ` +
+        `Prefix it, e.g. "openai:${spec}" or "anthropic:${spec}".`
+    );
+  }
+}
+
+/** Load prism.config.json (if present) and resolve a profile into concrete roles. */
+export function loadConfig(repoRoot: string, profileName?: string): ResolvedConfig {
+  const file = path.join(repoRoot, "prism.config.json");
+  let user: PrismConfig = {};
+  if (fs.existsSync(file)) {
+    try {
+      user = JSON.parse(fs.readFileSync(file, "utf8")) as PrismConfig;
+    } catch (e) {
+      throw new Error(`Invalid prism.config.json: ${(e as Error).message}`);
+    }
+  }
+
