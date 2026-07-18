@@ -15,3 +15,20 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prism": "tsx src/cli.ts",
+    "verify": "tsx src/cli.ts verify",
+    "dashboard": "tsx src/cli.ts dashboard",
+    "mcp": "tsx src/mcp/server.ts"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
