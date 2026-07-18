@@ -53,3 +53,31 @@ export interface Evidence {
   rules?: EvidenceRule[];
 }
 
+export interface Tests {
+  command?: string;
+  passed: string[];
+  failed: string[];
+  notRun: string[];
+}
+
+export interface Assumption {
+  claim: string;
+  couldChangeVerdict?: boolean;
+  howToResolve?: string;
+}
+
+export interface Risk {
+  severity: Severity;
+  location?: string;
+  description: string;
+  category?:
+    | "security"
+    | "data-integrity"
+    | "correctness"
+    | "ux"
+    | "cost"
+    | "regression"
+    | "supply-chain"
+    | "other";
+}
+
