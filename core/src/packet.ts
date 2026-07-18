@@ -42,3 +42,14 @@ export function writeRun(repoRoot: string, packet: ProofPacket): string {
   return file;
 }
 
+/** Locate the HTML renderer template (repo root renderer/ or a copy in core/). */
+export function rendererPath(): string {
+  const candidates = [
+    path.join(__dirname, "..", "..", "renderer", "proof-packet.html"),
+    path.join(__dirname, "..", "renderer", "proof-packet.html"),
+    path.join(process.cwd(), "renderer", "proof-packet.html"),
+  ];
+  for (const c of candidates) if (fs.existsSync(c)) return c;
+  throw new Error("renderer/proof-packet.html not found");
+}
+
