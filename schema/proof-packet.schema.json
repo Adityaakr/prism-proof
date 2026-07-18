@@ -205,3 +205,32 @@
           },
           "citation": { "type": "string" }
         }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "description": "Measured block — the falsifier data. Never prose, never fabricated.",
+      "additionalProperties": false,
+      "properties": {
+        "divergence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "evidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "conclusion": { "type": "number", "minimum": 0, "maximum": 1 },
+            "threshold": { "type": "number" },
+            "calibrated": { "type": "boolean" }
+          }
+        },
+        "grounding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "precision": { "type": "number", "minimum": 0, "maximum": 1 },
+            "recall": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "fleet": {
+          "type": "object",
+          "additionalProperties": false,
