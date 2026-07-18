@@ -27,3 +27,37 @@ function git(repoRoot: string, args: string[]): string {
   });
 }
 
+/** Best-effort default branch: origin/HEAD → main → master. */
+export function defaultBranch(repoRoot: string): string {
+  try {
+    const ref = git(repoRoot, ["symbolic-ref", "refs/remotes/origin/HEAD"]).trim();
+    const m = ref.match(/origin\/(.+)$/);
+    if (m) return m[1];
+  } catch {
+    /* no remote */
+  }
+  for (const b of ["main", "master"]) {
+    try {
+      git(repoRoot, ["rev-parse", "--verify", b]);
+      return b;
+    } catch {
+      /* not present */
+    }
+  }
+  return "HEAD";
+}
+
+function numstatArgs(source: DiffInfo["source"], base: string, ref?: string): string[] {
+  switch (source) {
+    case "staged":
+      return ["--staged"];
+    case "branch":
+      return [`${base}...HEAD`];
+    case "commit-range":
+      return [ref ?? "HEAD~1..HEAD"];
+    case "worktree":
+    default:
+      return [];
+  }
+}
+
