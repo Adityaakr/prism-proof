@@ -75,3 +75,39 @@ describe("verify — verdicts", () => {
     expect(packet.verdict.decision).toBe("human-review");
   });
 
+  it("BLOCK: a high-severity risk", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "risky", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({ risks: [{ severity: "high", location: "src/pay.ts:5", description: "auth bypass", category: "security" }] }),
+      testResult: greenTests, id: "t-block", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.verdict.decision).toBe("block");
+  });
+
+  it("BLOCK: failing tests can't be dressed as done", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({}), testResult: { command: "npm test", passed: [], failed: ["suite failed"], notRun: [] },
+      id: "t-block2", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.verdict.decision).toBe("block");
+  });
+
+  it("BLOCK: skeptic panel strikes a non-grounded load-bearing claim", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      // bad citation => non-grounded; medium risk triggers the panel; skeptics all refute
+      mock: mockScript({
+        claims: [badClaim],
+        risks: [{ severity: "medium", location: "src/pay.ts:5", description: "unclear", category: "correctness" }],
+        skeptic: JSON.stringify({ vote: "refute", reason: "counterexample" }),
+      }),
+      testResult: greenTests, id: "t-block3", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.claims?.[0].label).toBe("struck");
+    expect(packet.verdict.decision).toBe("block");
+  });
+
