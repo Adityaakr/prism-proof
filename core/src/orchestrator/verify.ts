@@ -103,3 +103,27 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
     g = {};
   }
 
+  const verified: Verified = {
+    inScope: g.verified?.inScope ?? [],
+    outOfScope: g.verified?.outOfScope ?? [],
+  };
+  const evidence: Evidence = {
+    files: g.evidence?.files ?? [],
+    docs: g.evidence?.docs ?? [],
+    rules: mergeRules(input.projectRules, g.evidence?.rules),
+  };
+  const risks: Risk[] = [...(g.risks ?? [])];
+  const assumptions: Assumption[] = g.assumptions ?? [];
+
+  // ---- 2. Structural grounding: is each citation re-openable in-repo? ------
+  // A valid citation is NECESSARY but not sufficient for `grounded` — cited claims still go
+  // through the skeptic panel below, so a citation no longer immunizes a claim from refutation.
+  const claims: Claim[] = (g.claims ?? []).map((c, i) => ({
+    id: c.id ?? `c${i + 1}`,
+    text: c.text,
+    citation: c.citation,
+    label: "cross-model-survived" as ClaimLabel, // provisional; decided after the panel
+  }));
+  const citationValid = new Map<string, boolean>();
+  for (const c of claims) citationValid.set(c.id, citationHolds(repoRoot, c.citation));
+
