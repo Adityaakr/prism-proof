@@ -57,3 +57,32 @@
       "description": "Q6 — the decision. This is the proof layer's whole point.",
       "required": ["decision", "rationale"],
       "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": ["accept", "human-review", "block"],
+          "description": "accept = grounded + tests green + no high risk; human-review = uncertain or medium risk; block = a high-severity risk, a failing test presented as done, or a struck load-bearing claim."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "One paragraph: why this decision, tied to the risks/tests/assumptions below."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        }
+      }
+    },
+    "verified": {
+      "type": "object",
+      "description": "Q1 — scope. What was actually examined vs. left out. Honesty about out-of-scope is mandatory.",
+      "required": ["inScope", "outOfScope"],
+      "additionalProperties": false,
+      "properties": {
+        "inScope": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Concrete things checked (e.g. 'balance-transfer path in ledger.ts', 'auth on the new /pay route')."
+        },
+        "outOfScope": {
+          "type": "array",
