@@ -209,3 +209,29 @@
     }));
   }
 
+  // Telemetry
+  var meters = "";
+  if (div.score != null) meters += '<div class="meter"><div class="k">Divergence</div><div class="v">' + div.score.toFixed(2) + '</div><div class="bar"><span style="width:' + Math.round(div.score * 100) + '%"></span></div><div class="muted" style="font-size:11px;margin-top:4px">ev ' + (div.evidence ?? "-") + " · concl " + (div.conclusion ?? "-") + (div.calibrated ? "" : " · thr " + div.threshold + " UNCALIBRATED") + "</div></div>";
+  if (tel.cost && tel.cost.totalUsd != null) meters += '<div class="meter"><div class="k">Cost</div><div class="v">$' + tel.cost.totalUsd + "</div></div>";
+  if (models.decorrelation) meters += '<div class="meter"><div class="k">Decorrelation</div><div class="v" style="font-size:14px">' + esc(models.decorrelation) + "</div></div>";
+
+  var skeptics = "";
+  if (models.skeptics && models.skeptics.length) {
+    skeptics = '<div class="scroll"><table><thead><tr><th>Model</th><th>Provider</th><th>Vote</th></tr></thead><tbody>';
+    models.skeptics.forEach(function (s) {
+      skeptics += "<tr><td class='mono'>" + esc(s.model) + "</td><td class='muted'>" + esc(s.provider || "") + "</td><td class='vote " + esc(s.vote || "") + "'>" + esc(s.vote || "") + "</td></tr>";
+    });
+    skeptics += "</tbody></table></div>";
+  }
+  html += sec("Telemetry", "◷",
+    '<div class="meters">' + meters + "</div>" +
+    (models.draft ? '<p class="muted" style="margin-top:12px">draft: <span class="mono">' + esc(models.draft) + "</span> · judge: <span class='mono'>" + esc(models.judge || "-") + "</span></p>" : "") +
+    (skeptics ? "<strong>Skeptic panel</strong>" + skeptics : ""));
+
+  html += '<div class="foot">Prism proof layer · schema v' + esc(p.schemaVersion || "?") + " · " + esc(p.createdAt || "") + "<br>Grounding outranks cross-model/cross-tier survival. Cross-model decorrelation reduces error correlation but not shared-training blind spots.</div>";
+
+  document.getElementById("app").innerHTML = html;
+})();
+</script>
+</body>
+</html>
