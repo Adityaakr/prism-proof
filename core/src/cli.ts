@@ -26,3 +26,30 @@ function parseArgs(argv: string[]): { _: string[]; flags: Record<string, string 
   return { _, flags };
 }
 
+function repoRootFrom(cwd: string): string {
+  try {
+    return execFileSync("git", ["rev-parse", "--show-toplevel"], { cwd, encoding: "utf8" }).trim();
+  } catch {
+    return cwd;
+  }
+}
+
+/** Best-effort extraction of cited invariants from .prism/project-model.md. */
+function readProjectRules(repoRoot: string): Evidence["rules"] {
+  const file = path.join(repoRoot, ".prism", "project-model.md");
+  if (!fs.existsSync(file)) return [];
+  const lines = fs.readFileSync(file, "utf8").split("\n");
+  const rules: NonNullable<Evidence["rules"]> = [];
+  let inSection = false;
+  for (const line of lines) {
+    if (/^##\s+Invariants/i.test(line)) { inSection = true; continue; }
+    if (inSection && /^##\s+/.test(line)) break;
+    if (!inSection) continue;
+    const m = line.match(/^\s*[-*]\s+(.*)$/);
+    if (!m) continue;
+    const cite = m[1].match(/`?([\w./-]+:\d+(?:-\d+)?)`?/);
+    rules.push({ rule: m[1].replace(/`/g, ""), citation: cite?.[1], status: "n/a" });
+  }
+  return rules;
+}
+
