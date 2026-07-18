@@ -87,3 +87,22 @@ Verified · Evidence · Tests · Assumptions · Risks · Verdict (accept | human
   Core + MCP + dashboard, MCP SDK is TS-first; adapters hit any OpenAI-compatible endpoint so
   open models work regardless. Alt: Python (heavier local-model ecosystem).
 
+### Phase 2 — Distribution
+- **MCP server** exposing `prism-verify` / `prism-plan` / etc. → any MCP client (Claude Code,
+  Codex, Cursor, Zed).
+- **CLI** `prism verify|plan|...` for scripts/CI.
+- **Codex integration** via MCP or a Codex custom command calling the CLI.
+- **Enforcement** as git hooks (pre-push/pre-commit) + a **Stop hook** for Claude Code that fires
+  the gate when a session ends with staged changes — the literal "gate between generation and merge."
+
+### Phase 3 — Web dashboard (a proof + measurement console, not "run history")
+Primary GUI now that VS Code is dropped. Contents that earn their place:
+1. **Merge-gate queue** — every run + verdict; the team review inbox (blocked / needs-review / accepted).
+2. **Model-comparison view** — per run, how each model in the skeptic panel voted; which model
+   catches what others miss; makes cross-model decorrelation visible + measurable (a live eval).
+3. **Cost/quality ledger per provider** — $ + tokens by model, so devs tune the config.
+4. **Eval trends** — divergence, grounding P/R, fleet-vs-single win rate over time.
+5. **Project-memory browser** — invariants, danger zones, decision log across repos, with
+   `/prism-prune` staleness flags.
+Reuses `renderer/proof-packet.html` for the packet detail view.
+
