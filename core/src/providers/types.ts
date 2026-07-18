@@ -35,3 +35,36 @@ export interface CompletionResult {
   usage?: Usage;
 }
 
+export interface Provider {
+  /** provider id: "anthropic" | "openai-compatible" | "mock" */
+  readonly name: string;
+  complete(model: string, req: CompletionRequest): Promise<CompletionResult>;
+}
+
+/** Return the first balanced {...} or [...] span starting with `opener`, string-aware. */
+function firstBalanced(s: string, opener: "{" | "["): string | null {
+  const close = opener === "{" ? "}" : "]";
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] !== opener) continue;
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    for (let j = i; j < s.length; j++) {
+      const c = s[j];
+      if (inStr) {
+        if (esc) esc = false;
+        else if (c === "\\") esc = true;
+        else if (c === '"') inStr = false;
+        continue;
+      }
+      if (c === '"') inStr = true;
+      else if (c === "{" || c === "[") depth++;
+      else if (c === "}" || c === "]") {
+        depth--;
+        if (depth === 0) return c === close ? s.slice(i, j + 1) : null;
+      }
+    }
+  }
+  return null;
+}
+
