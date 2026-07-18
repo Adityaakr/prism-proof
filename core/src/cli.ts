@@ -98,3 +98,27 @@ async function cmdVerify(flags: Record<string, string | boolean>) {
     testResult, now, id,
   });
 
+  const v = validate(packet);
+  if (!v.valid) console.error("WARNING: proof packet failed schema validation:\n  " + v.errors.join("\n  "));
+
+  const jsonPath = writeRun(repoRoot, packet);
+  const htmlPath = flags.render === false ? null : writeHtml(repoRoot, packet);
+
+  if (flags.json) {
+    console.log(JSON.stringify(packet, null, 2));
+    return;
+  }
+
+  const d = packet.verdict.decision.toUpperCase();
+  console.log(`\n  VERDICT: ${d}`);
+  console.log(`  ${packet.verdict.rationale}`);
+  if (packet.risks.length) {
+    console.log(`\n  Risks:`);
+    for (const r of packet.risks) console.log(`   [${r.severity}] ${r.location ?? ""} ${r.description}`);
+  }
+  console.log(`\n  Proof packet: ${path.relative(repoRoot, jsonPath)}`);
+  if (htmlPath) console.log(`  Rendered:     ${path.relative(repoRoot, htmlPath)}`);
+  // exit code encodes the verdict for CI gating: 0 accept, 1 block, 3 human-review
+  process.exit(packet.verdict.decision === "accept" ? 0 : packet.verdict.decision === "block" ? 1 : 3);
+}
+
