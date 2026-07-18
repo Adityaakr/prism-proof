@@ -46,3 +46,23 @@ async function runVerify(args: any) {
   return { packet, jsonPath, htmlPath, valid: v.valid, errors: v.errors };
 }
 
+function hash(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+
+async function main() {
+  let McpServer: any, StdioServerTransport: any;
+  // Computed specifiers keep tsc from statically resolving an optional dependency.
+  const pkg = ["@modelcontextprotocol", "sdk"].join("/");
+  try {
+    ({ McpServer } = await import(`${pkg}/server/mcp.js`));
+    ({ StdioServerTransport } = await import(`${pkg}/server/stdio.js`));
+  } catch {
+    console.error(
+      "Prism MCP server needs @modelcontextprotocol/sdk. Install it:\n  npm i @modelcontextprotocol/sdk\nThen re-run `npm run mcp`."
+    );
+    process.exit(1);
+  }
+
