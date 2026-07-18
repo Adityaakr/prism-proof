@@ -53,3 +53,24 @@ function readProjectRules(repoRoot: string): Evidence["rules"] {
   return rules;
 }
 
+function runTests(repoRoot: string, cmd: string): Tests {
+  try {
+    execSync(cmd, { cwd: repoRoot, stdio: "pipe", encoding: "utf8" });
+    return { command: cmd, passed: [cmd], failed: [], notRun: [] };
+  } catch (e: any) {
+    const out = String(e.stdout ?? "") + String(e.stderr ?? "");
+    const tail = out.split("\n").slice(-6).join("\n").trim();
+    return { command: cmd, passed: [], failed: [`${cmd}${tail ? " — " + tail : ""}`], notRun: [] };
+  }
+}
+
+function slug(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 32) || "run";
+}
+
+async function cmdVerify(flags: Record<string, string | boolean>) {
+  const cwd = process.cwd();
+  const repoRoot = repoRootFrom(cwd);
+  const profile = typeof flags.profile === "string" ? flags.profile : undefined;
+  const config = loadConfig(repoRoot, profile);
+
