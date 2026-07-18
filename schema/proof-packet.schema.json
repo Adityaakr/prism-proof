@@ -234,3 +234,33 @@
         "fleet": {
           "type": "object",
           "additionalProperties": false,
+          "properties": {
+            "lenses": { "type": "integer", "minimum": 0 },
+            "tokenMultipleVsSingle": { "type": ["number", "null"] }
+          }
+        },
+        "models": {
+          "type": "object",
+          "description": "The provider-neutral record of which model played which role — the data the dashboard's model-comparison view reads.",
+          "additionalProperties": false,
+          "properties": {
+            "draft": { "type": "string" },
+            "judge": { "type": "string" },
+            "groundingVerifier": { "type": "string" },
+            "skeptics": {
+              "type": "array",
+              "description": "One entry per skeptic. When lineages differ this is genuine cross-model decorrelation.",
+              "items": {
+                "type": "object",
+                "required": ["model"],
+                "additionalProperties": false,
+                "properties": {
+                  "model": { "type": "string", "description": "e.g. 'claude-opus-4-8', 'gpt-5-codex', 'qwen2.5-coder:32b'." },
+                  "provider": { "type": "string", "enum": ["anthropic", "openai", "openai-compatible", "ollama", "other"] },
+                  "vote": { "type": "string", "enum": ["refute", "uphold", "abstain"], "description": "Per load-bearing claim votes live in claims[]; this is the run-level summary vote if applicable." }
+                }
+              }
+            },
+            "decorrelation": {
+              "type": "string",
+              "enum": ["cross-model", "cross-tier", "single-model"],
