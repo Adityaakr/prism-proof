@@ -94,3 +94,31 @@ export interface SkepticVote {
   vote?: "refute" | "uphold" | "abstain";
 }
 
+export interface Telemetry {
+  divergence?: {
+    score: number;
+    evidence: number;
+    conclusion: number;
+    threshold: number;
+    calibrated: boolean;
+  };
+  grounding?: { precision: number; recall: number };
+  fleet?: { lenses: number; tokenMultipleVsSingle: number | null };
+  models?: {
+    draft?: string;
+    judge?: string;
+    groundingVerifier?: string;
+    skeptics?: SkepticVote[];
+    decorrelation?: Decorrelation;
+  };
+  cost?: {
+    totalUsd: number | null;
+    byProvider: {
+      provider: string;
+      tokensIn?: number;
+      tokensOut?: number;
+      usd?: number | null;
+    }[];
+  };
+}
+
