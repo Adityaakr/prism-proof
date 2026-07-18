@@ -116,3 +116,24 @@ export function loadConfig(repoRoot: string, profileName?: string): ResolvedConf
     skeptics: override?.skeptics ?? base?.skeptics ?? [],
   };
 
+  // A custom (non-builtin) profile must define every role — no silent mock backfill.
+  const missing: string[] = [];
+  if (!roles.draft) missing.push("draft");
+  if (!roles.judge) missing.push("judge");
+  if (!roles.groundingVerifier) missing.push("groundingVerifier");
+  if (!roles.skeptics.length) missing.push("skeptics");
+  if (missing.length) {
+    throw new Error(`Profile "${profile}" is missing role(s): ${missing.join(", ")}. A custom profile must define draft, judge, groundingVerifier and skeptics.`);
+  }
+
+  for (const spec of [roles.draft, roles.judge, roles.groundingVerifier, ...roles.skeptics]) {
+    assertValidSpec(spec, profile);
+  }
+
+  return {
+    profile,
+    roles,
+    decorrelation: decorrelationOf(roles.skeptics),
+    baseUrls: user.baseUrls ?? {},
+  };
+}
