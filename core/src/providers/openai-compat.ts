@@ -42,3 +42,18 @@ export class OpenAICompatibleProvider implements Provider {
     }
     const data: any = await res.json();
     const choice = data.choices?.[0];
+    const text = choice?.message?.content;
+    if (text == null) {
+      throw new Error(`${this.name}: empty completion (choices=${JSON.stringify(data.choices ?? null).slice(0, 200)})`);
+    }
+    return {
+      text,
+      model,
+      provider: this.name,
+      usage: {
+        inputTokens: data.usage?.prompt_tokens ?? 0,
+        outputTokens: data.usage?.completion_tokens ?? 0,
+      },
+    };
+  }
+}
