@@ -27,3 +27,18 @@ export class OpenAICompatibleProvider implements Provider {
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) headers["authorization"] = `Bearer ${this.apiKey}`;
 
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model,
+        temperature: req.temperature ?? 0,
+        max_tokens: req.maxTokens ?? 2048,
+        messages,
+      }),
+    });
+    if (!res.ok) {
+      throw new Error(`${this.name} API ${res.status}: ${await res.text()}`);
+    }
+    const data: any = await res.json();
+    const choice = data.choices?.[0];
