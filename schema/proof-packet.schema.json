@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Adityaakr/prism-claude-code/schema/proof-packet.schema.json",
+  "title": "Prism Proof Packet",
+  "description": "Provider-neutral, machine-readable record of one Prism verification run. Emitted by /prism-verify (and, in reduced form, by plan/build/implement) to .prism/runs/<id>.json. This is the spine every Prism UI renders and every provider adapter produces. It answers the article's six questions: Verified, Evidence, Tests, Assumptions, Risks, Verdict.",
+  "type": "object",
+  "required": ["schemaVersion", "id", "task", "verdict", "verified", "evidence", "tests", "assumptions", "risks"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Proof Packet schema version. Bump on breaking changes so renderers can adapt."
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable run id, e.g. an ISO timestamp + short slug. Names the file .prism/runs/<id>.json."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the run completed. Stamped by the host, not invented by the model."
+    },
+    "command": {
+      "type": "string",
+      "enum": ["verify", "plan", "build", "implement", "feedback"],
+      "description": "Which Prism command produced this packet."
+    },
+    "task": {
