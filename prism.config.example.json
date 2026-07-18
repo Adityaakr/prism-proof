@@ -10,3 +10,16 @@
       "groundingVerifier": "ollama:qwen2.5-coder:7b",
       "skeptics": ["anthropic:claude-opus-4-8", "openai:gpt-5-codex", "ollama:qwen2.5-coder:32b"]
     },
+    "local": {
+      "//": "Zero API keys — runs entirely on local open models via Ollama.",
+      "draft": "ollama:qwen2.5-coder:32b",
+      "judge": "ollama:qwen2.5-coder:32b",
+      "groundingVerifier": "ollama:qwen2.5-coder:7b",
+      "skeptics": ["ollama:qwen2.5-coder:32b", "ollama:deepseek-coder-v2:16b", "ollama:llama3.1:8b"]
+    }
+  },
+  "baseUrls": {
+    "//": "Override or add OpenAI-compatible endpoints here, e.g. a remote vLLM box.",
+    "vllm": "http://localhost:8000/v1"
+  }
+}
