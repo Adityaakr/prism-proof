@@ -106,3 +106,30 @@ function parseNumstat(numstat: string): ResolvedDiff["files"] {
     });
 }
 
+function parseFilesFromPatch(patch: string): ResolvedDiff["files"] {
+  const files: ResolvedDiff["files"] = [];
+  const re = /^\+\+\+ b\/(.+)$/gm;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(patch))) files.push({ path: m[1], insertions: 0, deletions: 0 });
+  return files;
+}
+
+/**
+ * Structural grounding check: does the cited "path:line" point at a real, in-repo file
+ * with at least that many lines? This is a NECESSARY condition for labelling a claim
+ * `grounded` — it proves the citation is re-openable inside the repo. It is NOT sufficient
+ * on its own (it does not read the line's *content*); the orchestrator still routes cited
+ * claims through the skeptic panel, so a valid citation no longer immunizes a claim.
+ *
+ * Hardened against: sibling-dir escape (`/repo` vs `/repo-evil`), `../` traversal, symlink
+ * escape, off-by-one on a trailing newline, and reversed/zero line ranges.
+ */
+export function citationHolds(repoRoot: string, citation?: string): boolean {
+  if (!citation) return false;
+  const m = citation.match(/^(.+?):(\d+)(?:-(\d+))?$/);
+  if (!m) return false;
+  const rel = m[1];
+  const start = parseInt(m[2], 10);
+  const end = parseInt(m[3] ?? m[2], 10);
+  if (!Number.isFinite(start) || start < 1 || end < start) return false;
+
