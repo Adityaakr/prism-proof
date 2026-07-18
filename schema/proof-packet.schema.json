@@ -264,3 +264,33 @@
             "decorrelation": {
               "type": "string",
               "enum": ["cross-model", "cross-tier", "single-model"],
+              "description": "cross-model = skeptics span different model lineages (strongest); cross-tier = same lineage, different tiers; single-model = no decorrelation."
+            }
+          }
+        },
+        "cost": {
+          "type": "object",
+          "description": "Per-provider spend for the run — powers the dashboard cost/quality ledger.",
+          "additionalProperties": false,
+          "properties": {
+            "totalUsd": { "type": ["number", "null"] },
+            "byProvider": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["provider"],
+                "additionalProperties": false,
+                "properties": {
+                  "provider": { "type": "string" },
+                  "tokensIn": { "type": "integer", "minimum": 0 },
+                  "tokensOut": { "type": "integer", "minimum": 0 },
+                  "usd": { "type": ["number", "null"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
