@@ -27,3 +27,33 @@
       "description": "Which Prism command produced this packet."
     },
     "task": {
+      "type": "string",
+      "description": "The original task statement being verified — verbatim, not paraphrased."
+    },
+    "diff": {
+      "type": "object",
+      "description": "The change under verification.",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["staged", "branch", "commit-range", "pr", "worktree"],
+          "description": "How the diff was obtained."
+        },
+        "ref": {
+          "type": "string",
+          "description": "Concrete ref: branch name, commit range (a..b), or PR number/url."
+        },
+        "filesChanged": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "insertions": { "type": "integer", "minimum": 0 },
+        "deletions": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "description": "Q6 — the decision. This is the proof layer's whole point.",
+      "required": ["decision", "rationale"],
+      "additionalProperties": false,
