@@ -72,3 +72,38 @@ describe("citationHolds (real grounding re-open)", () => {
     fs.rmSync(dir, { recursive: true, force: true });
   });
 
+  it("does not count a trailing newline as an extra line, and rejects line 0 / reversed ranges", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "prism-cite2-")));
+    fs.writeFileSync(path.join(dir, "f.ts"), "one\ntwo\n"); // 2 real lines + trailing newline
+    expect(citationHolds(dir, "f.ts:2")).toBe(true);
+    expect(citationHolds(dir, "f.ts:3")).toBe(false); // line 3 does not exist
+    expect(citationHolds(dir, "f.ts:0")).toBe(false);
+    expect(citationHolds(dir, "f.ts:5-2")).toBe(false); // reversed range
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("blocks sibling-directory escape that shares the repo path prefix", () => {
+    const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "prism-root-")));
+    const sib = root + "-evil";
+    fs.mkdirSync(sib, { recursive: true });
+    fs.writeFileSync(path.join(sib, "secret.ts"), "top secret\n");
+    expect(citationHolds(root, `../${path.basename(sib)}/secret.ts:1`)).toBe(false);
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(sib, { recursive: true, force: true });
+  });
+});
+
+describe("extractJson", () => {
+  it("parses fenced, prefixed, and raw JSON", () => {
+    expect(extractJson('```json\n{"a":1}\n```')).toEqual({ a: 1 });
+    expect(extractJson('here you go: {"b":2} thanks')).toEqual({ b: 2 });
+    expect(extractJson('[1,2,3]')).toEqual([1, 2, 3]);
+  });
+  it("prefers the object over a stray leading array in prose", () => {
+    expect(extractJson('[1,2] and then {"verdict":"x"}')).toEqual({ verdict: "x" });
+  });
+  it("handles nested objects and strings containing braces", () => {
+    expect(extractJson('note {"a":{"b":"}"}} end')).toEqual({ a: { b: "}" } });
+  });
+});
+
