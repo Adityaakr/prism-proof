@@ -175,3 +175,33 @@
       "description": "Q5 — identified issues, each with severity and a location.",
       "items": {
         "type": "object",
+        "required": ["severity", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+          "location": { "type": "string", "description": "file:line where the risk lives." },
+          "description": { "type": "string" },
+          "category": {
+            "type": "string",
+            "enum": ["security", "data-integrity", "correctness", "ux", "cost", "regression", "supply-chain", "other"]
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "description": "Load-bearing claims and how each survived verification. grounded outranks cross-model-survived.",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "text": { "type": "string" },
+          "label": {
+            "type": "string",
+            "enum": ["grounded", "cross-model-survived", "cross-tier-survived", "struck"],
+            "description": "grounded = re-opened against live code/docs; cross-model-survived = skeptics across DIFFERENT model lineages did not refute (strongest decorrelation); cross-tier-survived = Claude-only tier split (weaker); struck = refuted and removed."
+          },
+          "citation": { "type": "string" }
+        }
