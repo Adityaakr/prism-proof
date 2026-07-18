@@ -53,3 +53,20 @@ export function rendererPath(): string {
   throw new Error("renderer/proof-packet.html not found");
 }
 
+/** Populate the renderer template with a packet and return the standalone HTML. */
+export function renderHtml(packet: ProofPacket, templatePath?: string): string {
+  const template = fs.readFileSync(templatePath ?? rendererPath(), "utf8");
+  const json = JSON.stringify(packet, null, 2).replace(/<\//g, "<\\/");
+  const re = /(<script id="proof-packet" type="application\/json">)([\s\S]*?)(<\/script>)/;
+  if (!re.test(template)) throw new Error("renderer template missing the proof-packet <script> block");
+  return template.replace(re, `$1\n${json}\n$3`);
+}
+
+/** Render + write an HTML packet next to its JSON. Returns the html path. */
+export function writeHtml(repoRoot: string, packet: ProofPacket): string {
+  const dir = path.join(repoRoot, ".prism", "runs");
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, `${packet.id}.html`);
+  fs.writeFileSync(file, renderHtml(packet));
+  return file;
+}
