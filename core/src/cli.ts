@@ -122,3 +122,32 @@ async function cmdVerify(flags: Record<string, string | boolean>) {
   process.exit(packet.verdict.decision === "accept" ? 0 : packet.verdict.decision === "block" ? 1 : 3);
 }
 
+function cmdDashboard(flags: Record<string, string | boolean>) {
+  const repoRoot = repoRootFrom(process.cwd());
+  const { html, runs } = buildDashboard(repoRoot);
+  const out = path.join(repoRoot, ".prism", "dashboard.html");
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.writeFileSync(out, html);
+  console.log(`Prism dashboard: ${path.relative(repoRoot, out)} (${runs} run${runs === 1 ? "" : "s"})`);
+  console.log(`Open it: open ${path.relative(repoRoot, out)}`);
+}
+
+function help() {
+  console.log(`Prism Core — the model-agnostic proof layer
+
+Usage:
+  prism verify [options]      Verify a diff and emit a Proof Packet
+  prism dashboard             Build the local proof/model-comparison dashboard
+  prism help                  Show this help
+
+verify options:
+  --source <staged|branch|commit-range|worktree>   what to verify (default: staged)
+  --base <branch>            base for --source branch (default: repo default branch)
+  --ref <range|number>       range for commit-range, or reuse with --pr
+  --pr <number>              verify a GitHub PR diff (needs gh)
+  --profile <name>           mock | local | claude | balanced (default: mock, or PRISM_PROFILE)
+  --task "<text>"            the original task statement
+  --test-cmd "<cmd>"         run this test command and fold results into the packet
+  --no-render                skip writing the HTML packet
+  --json                     print the packet JSON to stdout
+
