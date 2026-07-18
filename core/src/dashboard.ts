@@ -141,3 +141,5 @@ a{color:var(--accent)}.mono{font-family:var(--mono);font-size:12px}.muted{color:
 <tbody>${costRows || '<tr><td colspan="4" class="empty">no cost recorded</td></tr>'}</tbody></table></div>
 </div></body></html>`;
 
+  return { html, runs: runs.length };
+}
