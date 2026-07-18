@@ -61,3 +61,33 @@ function numstatArgs(source: DiffInfo["source"], base: string, ref?: string): st
   }
 }
 
+/** Resolve the diff under review into a patch + per-file stats. */
+export function resolveDiff(repoRoot: string, opts: DiffOptions = {}): ResolvedDiff {
+  const source = opts.source ?? "staged";
+
+  if (source === "pr") {
+    const n = opts.ref;
+    if (!n) throw new Error('pr source needs a ref (PR number), e.g. { source: "pr", ref: "42" }');
+    const patch = execFileSync("gh", ["pr", "diff", n], { cwd: repoRoot, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 });
+    return { info: { source, ref: n }, patch, files: parseFilesFromPatch(patch) };
+  }
+
+  const base = opts.base ?? defaultBranch(repoRoot);
+  if (source === "branch" && base === "HEAD") {
+    throw new Error("Cannot determine the base branch for a branch diff (no origin/HEAD, main, or master). Pass --base <branch>.");
+  }
+  const args = numstatArgs(source, base, opts.ref);
+  const patch = git(repoRoot, ["diff", ...args]);
+  const numstat = git(repoRoot, ["diff", "--numstat", ...args]);
+  const files = parseNumstat(numstat);
+  const ref = source === "branch" ? `${base}...HEAD` : source === "commit-range" ? (opts.ref ?? "HEAD~1..HEAD") : "worktree/staged";
+  const info: DiffInfo = {
+    source,
+    ref,
+    filesChanged: files.length,
+    insertions: files.reduce((n, f) => n + f.insertions, 0),
+    deletions: files.reduce((n, f) => n + f.deletions, 0),
+  };
+  return { info, patch, files };
+}
+
