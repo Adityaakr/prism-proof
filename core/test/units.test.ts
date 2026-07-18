@@ -129,3 +129,18 @@ describe("schema validation", () => {
   });
 });
 
+describe("renderHtml", () => {
+  it("injects the packet JSON into the renderer template", () => {
+    const packet: ProofPacket = {
+      schemaVersion: "1.0", id: "render-1", task: "render test",
+      verdict: { decision: "block", rationale: "nope" },
+      verified: { inScope: [], outOfScope: [] },
+      evidence: { files: [] }, tests: { passed: [], failed: [], notRun: [] },
+      assumptions: [], risks: [],
+    };
+    const html = renderHtml(packet);
+    expect(html).toContain('"render-1"');
+    expect(html).toContain('"block"');
+    expect(html).toContain("proof-packet");
+  });
+});
