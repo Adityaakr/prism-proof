@@ -152,3 +152,29 @@
   var models = tel.models || {};
   var div = tel.divergence || {};
 
+  var html = "";
+  html += '<div class="eyebrow">Prism · Proof Packet</div>';
+  html += "<h1>" + esc(p.id || "run") + "</h1>";
+  html += '<p class="task">' + esc(p.task || "") + "</p>";
+
+  // Verdict
+  var dec = v.decision || "human-review";
+  html += '<div class="verdict ' + dec + '">';
+  html += '<span class="badge ' + dec + '">' + esc(dec.replace("-", " ")) + "</span>";
+  html += '<div><div class="rationale">' + esc(v.rationale || "") + "</div>";
+  if (v.confidence) html += '<div class="conf">confidence: ' + esc(v.confidence) + "</div>";
+  html += "</div></div>";
+
+  // Q1 Verified
+  var vd = p.verified || {};
+  html += sec("Verified", "Q1",
+    "<strong>In scope</strong>" + list(vd.inScope, esc) +
+    "<strong>Out of scope</strong>" + list(vd.outOfScope, function (x) { return esc(x); }));
+
+  // Q2 Evidence
+  var ev = p.evidence || {};
+  html += sec("Evidence", "Q2",
+    "<strong>Files re-opened</strong>" + list(ev.files, function (f) { return loc(f.path + ":" + f.lines) + (f.why ? ' <span class="muted">— ' + esc(f.why) + "</span>" : ""); }) +
+    "<strong>Docs / types checked</strong>" + list(ev.docs, function (d) { return "<span class='mono'>" + esc(d.source) + "</span>" + (d.claim ? ' <span class="muted">— ' + esc(d.claim) + "</span>" : ""); }) +
+    "<strong>Rules / invariants</strong>" + list(ev.rules, function (r) { return esc(r.rule) + " " + (r.citation ? loc(r.citation) : "") + ' <span class="muted">[' + esc(r.status || "?") + "]</span>"; }));
+
