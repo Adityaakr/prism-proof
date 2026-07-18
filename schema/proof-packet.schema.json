@@ -146,3 +146,32 @@
       "required": ["passed", "failed", "notRun"],
       "additionalProperties": false,
       "properties": {
+        "command": { "type": "string", "description": "The actual test command executed." },
+        "passed": { "type": "array", "items": { "type": "string" } },
+        "failed": { "type": "array", "items": { "type": "string" } },
+        "notRun": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tests that exist but were not exercised, and why (e.g. 'e2e — needs a live env')."
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "description": "Q4 — unresolved assumptions that could change the verdict if wrong.",
+      "items": {
+        "type": "object",
+        "required": ["claim"],
+        "additionalProperties": false,
+        "properties": {
+          "claim": { "type": "string" },
+          "couldChangeVerdict": { "type": "boolean" },
+          "howToResolve": { "type": "string" }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Q5 — identified issues, each with severity and a location.",
+      "items": {
+        "type": "object",
