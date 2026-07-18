@@ -1,0 +1,12 @@
+{
+  "//": "Prism Core config. Copy to prism.config.json and pick a profile. Model spec = '<kind>:<model>'.",
+  "//kinds": "mock | anthropic | openai | ollama | vllm | openrouter | lmstudio | together (any OpenAI-compatible endpoint).",
+  "defaultProfile": "balanced",
+  "profiles": {
+    "balanced": {
+      "//": "Genuine CROSS-MODEL decorrelation — skeptics span three lineages. The flagship.",
+      "draft": "anthropic:claude-opus-4-8",
+      "judge": "anthropic:claude-sonnet-5",
+      "groundingVerifier": "ollama:qwen2.5-coder:7b",
+      "skeptics": ["anthropic:claude-opus-4-8", "openai:gpt-5-codex", "ollama:qwen2.5-coder:32b"]
+    },
