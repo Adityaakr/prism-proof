@@ -78,3 +78,19 @@ export function buildDashboard(repoRoot: string): { html: string; runs: number }
     )
     .join("");
 
+  const modelRows = Object.entries(modelStats)
+    .map(([model, s]) => {
+      const total = s.refute + s.uphold;
+      const rate = total ? Math.round((s.refute / total) * 100) : 0;
+      return `<tr><td class="mono">${esc(model)}</td><td class="muted">${esc(s.provider)}</td><td>${s.refute}</td><td>${s.uphold}</td><td>
+        <div class="bar"><span style="width:${rate}%"></span></div><span class="muted">${rate}% refute</span></td></tr>`;
+    })
+    .join("");
+
+  const costRows = Object.entries(providerCost)
+    .map(
+      ([p, c]) =>
+        `<tr><td class="mono">${esc(p)}</td><td>${c.tokensIn.toLocaleString()}</td><td>${c.tokensOut.toLocaleString()}</td><td>${c.usd == null ? "—" : "$" + c.usd.toFixed(4)}</td></tr>`
+    )
+    .join("");
+
