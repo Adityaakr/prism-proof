@@ -19,3 +19,26 @@ record at `.prism/runs/<id>.json`. The verdict is one of **accept · human-revie
 Read `~/.prism/user.md`, follow the Persona Protocol, apply standing defaults (testnet-first,
 never assume mainnet, honesty over flattery). If missing, bootstrap per the protocol.
 
+## Step 1 — Assemble the case file (evidence capture, before any judgement)
+Gather, do not evaluate yet:
+1. **The task** — the original statement of what was supposed to be built ($ARGUMENTS, or ask).
+2. **The diff** — resolve the target: staged (`git diff --staged`), a branch (`git diff main...HEAD`),
+   a commit range, or a PR (`gh pr diff <n>`). Record source + ref + files/insertions/deletions.
+3. **The agent's claims** — if the coding agent left claims ("added auth", "tests pass"), capture
+   them as CLAIMS TO RECHECK, never as facts.
+4. **Project rules** — read `.prism/project-model.md` (Invariants, Danger zones, Conventions). Each
+   invariant is a rule the diff must not silently break.
+5. **Tests** — locate the suite and the exact command to run it.
+6. **Unresolved assumptions** — anything the task leaves open.
+State the case file in a few lines, then proceed. NEVER skip straight to a verdict.
+
+## Step 2 — Size the verification (risk-proportional — do NOT over-orchestrate)
+A proof layer that spins up eight agents for a rename is theatre. Classify the change:
+- **Low-risk + well-grounded** (rename, copy fix, a small pure function with passing tests and clean
+  citations) → **ONE verifier, fast verdict.** No panel.
+- **Medium** (new logic, a touched shared module, a non-trivial refactor) → grounding pass + a small
+  skeptic panel on the top load-bearing claims.
+- **High-risk / one-way door** (moves money, custody, auth, schema/migration, public API, deletes
+  data, mainnet) → full grounding + differential skeptic panel + MANDATORY security review.
+State: `Change: <n> files | Risk: low/medium/high | Verification: <what you'll run>`.
+
