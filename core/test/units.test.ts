@@ -107,3 +107,25 @@ describe("extractJson", () => {
   });
 });
 
+describe("schema validation", () => {
+  const good: ProofPacket = {
+    schemaVersion: "1.0", id: "x", task: "t",
+    verdict: { decision: "accept", rationale: "ok" },
+    verified: { inScope: [], outOfScope: [] },
+    evidence: { files: [] },
+    tests: { passed: [], failed: [], notRun: [] },
+    assumptions: [], risks: [],
+  };
+  it("accepts a well-formed packet", () => {
+    expect(validate(good).valid).toBe(true);
+  });
+  it("rejects a bad verdict enum", () => {
+    const bad = { ...good, verdict: { decision: "maybe", rationale: "x" } };
+    expect(validate(bad).valid).toBe(false);
+  });
+  it("rejects a missing required field", () => {
+    const { tests, ...bad } = good as any;
+    expect(validate(bad).valid).toBe(false);
+  });
+});
+
