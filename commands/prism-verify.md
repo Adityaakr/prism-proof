@@ -70,3 +70,17 @@ For high-risk diffs, route domain skeptics to concern-owned code (security → a
 data-integrity → schema/ledger, cost → fees/infra) so they see DIFFERENT code, not just read
 different prompts. Print the divergence line as usual.
 
+## Step 5 — Run the tests (observe, don't assume)
+Run the actual suite. Record what passed, what failed, and what did NOT run (with the reason).
+A failing or skipped test presented by the agent as "done" is a `block`-level finding. Also run
+`hooks/prism-gate.sh` on the diff if available — it catches faked-green (deleted/skipped tests),
+hardcoded secrets, and leftover debug.
+
+## Step 6 — Decide the verdict
+- **accept** — load-bearing claims `grounded`, tests green, no high/critical risk, invariants upheld.
+- **human-review** — grounded but with unresolved assumptions that could change the answer, medium
+  risk, or a claim that only `*-survived` (no grounding). The change may be fine; a human should look.
+- **block** — a high/critical risk, a failing/skipped test dressed as passing, a violated invariant,
+  or a struck load-bearing claim the change depends on.
+When in doubt, prefer `human-review` over `accept`. Never rubber-stamp.
+
