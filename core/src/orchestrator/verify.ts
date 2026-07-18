@@ -290,3 +290,31 @@ function decideVerdict(x: {
   const mediumRisk = x.risks.some((r) => r.severity === "medium");
   const openAssumption = x.assumptions.some((a) => a.couldChangeVerdict);
 
+  if (allGrounded && testsGreen && !mediumRisk && !openAssumption) {
+    return { decision: "accept", rationale: "All load-bearing claims re-grounded against live code, tests green, no material risk.", confidence: "high" };
+  }
+
+  const reasons: string[] = [];
+  if (!allGrounded) reasons.push("not every load-bearing claim is grounded");
+  if (!testsGreen) reasons.push("tests are not demonstrably green");
+  if (mediumRisk) reasons.push("a medium-severity risk is open");
+  if (openAssumption) reasons.push("an unresolved assumption could change the verdict");
+  return { decision: "human-review", rationale: `Needs human review: ${reasons.join("; ")}.`, confidence: "medium" };
+}
+
+// Rough public per-Mtoken prices (USD) for cost estimation; unknown models → null.
+const PRICE: Record<string, { in: number; out: number }> = {
+  anthropic: { in: 5, out: 25 },
+  openai: { in: 5, out: 15 },
+};
+
+function buildCost(usage: Record<string, { tokensIn: number; tokensOut: number }>): Telemetry["cost"] {
+  const byProvider = Object.entries(usage).map(([provider, u]) => {
+    const p = PRICE[provider];
+    const usd = p ? (u.tokensIn / 1e6) * p.in + (u.tokensOut / 1e6) * p.out : provider === "ollama" || provider === "mock" ? 0 : null;
+    return { provider, tokensIn: u.tokensIn, tokensOut: u.tokensOut, usd };
+  });
+  const known = byProvider.filter((b) => b.usd != null).map((b) => b.usd as number);
+  const totalUsd = byProvider.some((b) => b.usd == null) ? null : Number(known.reduce((a, b) => a + b, 0).toFixed(4));
+  return { totalUsd, byProvider };
+}
