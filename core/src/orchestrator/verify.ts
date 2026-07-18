@@ -196,3 +196,41 @@ export async function verify(input: VerifyInput): Promise<ProofPacket> {
     for (const claim of claims) claim.label = labelSurvivor(claim);
   }
 
+  // ---- 4. Tests -----------------------------------------------------------
+  const tests: Tests = input.testResult ?? { passed: [], failed: [], notRun: ["no test command supplied to verify"] };
+
+  // ---- 5. Verdict (deterministic from evidence) ---------------------------
+  const verdict = decideVerdict({ claims, risks, tests, assumptions, evidence });
+
+  // ---- 6. Telemetry -------------------------------------------------------
+  const telemetry: Telemetry = {
+    divergence,
+    models: {
+      draft: parseModelSpec(config.roles.draft).model,
+      judge: parseModelSpec(config.roles.judge).model,
+      groundingVerifier: gModel.model,
+      skeptics: skepticVotes,
+      decorrelation: config.decorrelation,
+    },
+    cost: buildCost(usage),
+    fleet: { lenses: runPanel ? config.roles.skeptics.length : 1, tokenMultipleVsSingle: null },
+  };
+
+  return {
+    schemaVersion: "1.0",
+    id: input.id ?? "run",
+    createdAt: input.now,
+    command: "verify",
+    task,
+    diff: diff.info,
+    verdict,
+    verified,
+    evidence,
+    tests,
+    assumptions,
+    risks: risks.sort((a, b) => SEV_RANK[a.severity] - SEV_RANK[b.severity]),
+    claims,
+    telemetry,
+  };
+}
+
