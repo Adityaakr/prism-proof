@@ -13,3 +13,17 @@ export class OpenAICompatibleProvider implements Provider {
   private baseUrl: string;
   private apiKey: string;
 
+  constructor(opts: { name?: string; baseUrl: string; apiKey?: string; apiKeyEnv?: string }) {
+    this.name = opts.name ?? "openai-compatible";
+    this.baseUrl = opts.baseUrl.replace(/\/$/, "");
+    this.apiKey = opts.apiKey ?? (opts.apiKeyEnv ? process.env[opts.apiKeyEnv] ?? "" : "");
+  }
+
+  async complete(model: string, req: CompletionRequest): Promise<CompletionResult> {
+    const messages = [
+      ...(req.system ? [{ role: "system", content: req.system }] : []),
+      ...req.messages.map((m) => ({ role: m.role, content: m.content })),
+    ];
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (this.apiKey) headers["authorization"] = `Bearer ${this.apiKey}`;
+
