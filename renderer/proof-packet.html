@@ -123,3 +123,32 @@
 }
 </script>
 
+<script>
+(function () {
+  var p;
+  try { p = JSON.parse(document.getElementById("proof-packet").textContent); }
+  catch (e) { document.getElementById("app").innerHTML = "<p>Invalid Proof Packet JSON.</p>"; return; }
+
+  var el = function (t) { return document.createElement(t); };
+  var esc = function (s) { var d = el("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; };
+  var loc = function (s) {
+    if (!s) return "";
+    var m = String(s).match(/^(.+?):(\d+)/);
+    if (!m) return '<span class="mono">' + esc(s) + "</span>";
+    return '<a class="loc" href="vscode://file/' + esc(m[1]) + ":" + esc(m[2]) + '">' + esc(s) + "</a>";
+  };
+  var list = function (arr, fn) {
+    if (!arr || !arr.length) return '<span class="empty">none</span>';
+    return "<ul>" + arr.map(function (x) { return "<li>" + fn(x) + "</li>"; }).join("") + "</ul>";
+  };
+  var sec = function (title, q, body) {
+    return '<section><h2><span class="q">' + q + "</span> · " + title + '</h2><div class="body">' + body + "</div></section>";
+  };
+
+  var v = p.verdict || {};
+  var sevRank = { critical: 0, high: 1, medium: 2, low: 3 };
+  var risks = (p.risks || []).slice().sort(function (a, b) { return (sevRank[a.severity] ?? 9) - (sevRank[b.severity] ?? 9); });
+  var tel = p.telemetry || {};
+  var models = tel.models || {};
+  var div = tel.divergence || {};
+
