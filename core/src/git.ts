@@ -91,3 +91,18 @@ export function resolveDiff(repoRoot: string, opts: DiffOptions = {}): ResolvedD
   return { info, patch, files };
 }
 
+function parseNumstat(numstat: string): ResolvedDiff["files"] {
+  return numstat
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => {
+      const [ins, del, ...rest] = l.split("\t");
+      return {
+        path: rest.join("\t"),
+        insertions: ins === "-" ? 0 : parseInt(ins, 10) || 0,
+        deletions: del === "-" ? 0 : parseInt(del, 10) || 0,
+      };
+    });
+}
+
