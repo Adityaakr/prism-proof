@@ -1,0 +1,17 @@
+{
+  "name": "@prism/core",
+  "version": "0.1.0",
+  "description": "Prism Core — the model-agnostic proof-layer engine. Verifies AI-generated diffs across Claude, Codex/GPT and open models, emitting a schema-valid Proof Packet.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "prism": "dist/cli.js"
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prism": "tsx src/cli.ts",
