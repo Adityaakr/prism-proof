@@ -34,3 +34,21 @@ export class AnthropicProvider implements Provider {
     if (!res.ok) {
       throw new Error(`Anthropic API ${res.status}: ${await res.text()}`);
     }
+    const data: any = await res.json();
+    const text = Array.isArray(data.content)
+      ? data.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("")
+      : "";
+    if (!text) {
+      throw new Error(`Anthropic: empty text response (stop_reason=${data.stop_reason ?? "?"})`);
+    }
+    return {
+      text,
+      model,
+      provider: this.name,
+      usage: {
+        inputTokens: data.usage?.input_tokens ?? 0,
+        outputTokens: data.usage?.output_tokens ?? 0,
+      },
+    };
+  }
+}
