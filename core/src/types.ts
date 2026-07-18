@@ -81,3 +81,16 @@ export interface Risk {
     | "other";
 }
 
+export interface Claim {
+  id: string;
+  text: string;
+  label: ClaimLabel;
+  citation?: string;
+}
+
+export interface SkepticVote {
+  model: string;
+  provider?: "anthropic" | "openai" | "openai-compatible" | "ollama" | "other";
+  vote?: "refute" | "uphold" | "abstain";
+}
+
