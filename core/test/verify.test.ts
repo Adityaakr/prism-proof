@@ -55,3 +55,23 @@ describe("verify — verdicts", () => {
     expect(validate(packet).valid).toBe(true);
   });
 
+  it("HUMAN-REVIEW: grounded but tests not run", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "small fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({}), id: "t-review", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.verdict.decision).toBe("human-review");
+    expect(validate(packet).valid).toBe(true);
+  });
+
+  it("HUMAN-REVIEW: medium risk present, tests green", async () => {
+    const cfg = loadConfig(repo, "mock");
+    const packet = await verify({
+      task: "fix", diff: diff(), repoRoot: repo, config: cfg,
+      mock: mockScript({ risks: [{ severity: "medium", location: "src/pay.ts:5", description: "edge case", category: "correctness" }] }),
+      testResult: greenTests, id: "t-review2", now: "2026-07-19T00:00:00Z",
+    });
+    expect(packet.verdict.decision).toBe("human-review");
+  });
+
