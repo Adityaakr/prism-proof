@@ -74,3 +74,27 @@ async function cmdVerify(flags: Record<string, string | boolean>) {
   const profile = typeof flags.profile === "string" ? flags.profile : undefined;
   const config = loadConfig(repoRoot, profile);
 
+  const diffOpts: DiffOptions = {
+    source: (flags.source as DiffOptions["source"]) ?? (flags.pr ? "pr" : "staged"),
+    base: typeof flags.base === "string" ? flags.base : undefined,
+    ref: typeof flags.ref === "string" ? flags.ref : typeof flags.pr === "string" ? flags.pr : undefined,
+  };
+  const diff = resolveDiff(repoRoot, diffOpts);
+  if (!diff.patch.trim()) {
+    console.error("prism verify: empty diff. Stage changes or pass --source branch/--pr <n>.");
+    process.exit(2);
+  }
+
+  const task = typeof flags.task === "string" ? flags.task : `Verify ${diffOpts.source} change (${diff.info.filesChanged} files)`;
+  const testResult = typeof flags["test-cmd"] === "string" ? runTests(repoRoot, flags["test-cmd"] as string) : undefined;
+  const now = new Date().toISOString();
+  const id = `${now.slice(0, 10)}-${slug(task)}`;
+
+  console.error(`prism verify | profile: ${config.profile} | decorrelation: ${config.decorrelation} | ${diff.info.filesChanged} files`);
+
+  const packet = await verify({
+    task, diff, repoRoot, config,
+    projectRules: readProjectRules(repoRoot),
+    testResult, now, id,
+  });
+
