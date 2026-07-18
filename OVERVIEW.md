@@ -308,6 +308,7 @@ and self-activates, but they are playbook instructions and tested scripts, not y
 ## 11. Documents
 <!-- prism:docs -->
 - [`01-prism-three-improvements.md`](docs/01-prism-three-improvements.md): Plan 01: Three Prism improvements (big codebases, clean code, /prism-write)
+- [`01-proof-layer-and-ui.md`](docs/01-proof-layer-and-ui.md): 01 — Prism: Proof Layer, Model-Agnostic Core & UI Platform
 - [`02-whats-new-article.html`](docs/02-whats-new-article.html): Three things we added to Prism
 - [`03-prism-production-readiness.md`](docs/03-prism-production-readiness.md): Plan 03: Prism to production-grade
 - [`04-path-to-production-grade.md`](docs/04-path-to-production-grade.md): Plan 04: The 9.8 gap, and what "done" means for each item

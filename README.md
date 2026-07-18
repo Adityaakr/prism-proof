@@ -1,19 +1,31 @@
-# Prism 🔱 — an orchestration playbook for Claude Code
+# Prism 🔱 — the proof layer for AI-generated software
 
-> *One question goes in; a prism splits it into a full spectrum of expert perspectives,
-> then recombines them into one verified answer.*
+> *AI writes the change. Prism builds the case for whether that change should ship.*
 
-A set of [Claude Code](https://claude.com/claude-code) slash commands that turn a single
-hard question into a **coordinated team of AI agents** — fanning out across diverse
-perspectives, judging their disagreements, adversarially verifying the conclusions, and
-looping until the answer converges.
+Prism is a model-agnostic verification engine and orchestration toolkit for AI-assisted
+software development. It grounds claims in the real repository, can run adversarial reviewers
+across model lineages, records test evidence, and emits a schema-valid **Proof Packet** with
+an `accept`, `human-review`, or `block` verdict.
 
-Instead of asking one model once and trusting the first answer, you get a deliberation:
-many agents reason in parallel from different angles, skeptics try to *refute* the key
-claims, and only what survives makes it into the final output.
+Use it through the Core CLI, an MCP server, a local proof dashboard, or the native
+[Claude Code](https://claude.com/claude-code) slash-command lifecycle. Provider adapters
+support Anthropic, OpenAI/Codex, Ollama, vLLM, OpenRouter, LM Studio, Together, and custom
+OpenAI-compatible endpoints.
 
-> **One sentence:** it makes Claude think like a team of experts arguing toward the
-> right answer, instead of a single voice guessing at it.
+> **One sentence:** Prism turns “the agent says it works” into inspectable evidence another
+> model, a reviewer, or CI can challenge.
+
+## What ships today
+
+| Surface | What it does |
+|---|---|
+| **Prism Core** | TypeScript verification engine: model grounding → structural citation checks → risk-sized skeptic panel → deterministic verdict |
+| **Proof Packet** | Provider-neutral JSON contract covering evidence, tests, assumptions, risks, verdict, and telemetry |
+| **CLI** | Verifies staged, worktree, branch, commit-range, or GitHub PR diffs; returns CI-friendly exit codes |
+| **MCP server** | Exposes `prism_verify` to Claude Code, Codex, Cursor, Zed, and other MCP clients |
+| **Dashboard + renderer** | Builds a local run history and model-comparison view; renders standalone HTML proof artifacts |
+| **Native Claude commands** | Thirteen commands for understanding, planning, building, implementing, attacking, verifying, learning, and shipping |
+| **Provider profiles** | `mock`, all-local Ollama, Claude-only, cross-model balanced, and custom role-to-model maps |
 
 ---
 
@@ -26,59 +38,36 @@ claims, and only what survives makes it into the final output.
 > open it at [excalidraw.com](https://excalidraw.com) (File → Open) to edit or export a PNG/SVG.
 
 ```mermaid
-flowchart TB
-    U([USER asks a question]) --> R["/prism  (router)<br/>auto-classifies the task"]
+flowchart LR
+    CHANGE["AI-generated diff"] --> INPUTS["CLI · MCP · /prism-verify"]
 
-    R -.routes to one.-> LIFECYCLE
-
-    subgraph LIFECYCLE [Lifecycle - each stage banks what it learns into memory]
+    subgraph CORE [Prism Core]
         direction LR
-        UN["/prism-understand<br/>map code → memory"]
-        DE["/prism-plan · /prism-build<br/>decide + roadmap"]
-        IM["/prism-implement<br/>write → test → fix (green)"]
-        FB["/prism-feedback<br/>try to break it"]
-        RE["/prism-retro<br/>predicted vs actual → lessons"]
-        UN --> DE --> IM --> FB --> RE
+        G["Ground claims<br/>in repo + tests"] --> CITE["Re-open cited<br/>file:line evidence"]
+        CITE --> S["Risk-sized<br/>skeptic panel"]
+        S --> V["Verdict"]
     end
 
-    DE --> ENGINE
-    IM --> ENGINE
+    INPUTS --> G
 
-    subgraph ENGINE [Deliberation Engine - shared by plan / build / implement / feedback]
-        direction LR
-        FO["FAN-OUT<br/>differential context<br/>(lenses see different code)"] --> DV["DIVERGENCE<br/>score - flags if<br/>diversity is cosmetic"]
-        DV --> JU["JUDGE<br/>resolve, not merge"]
-        JU --> VE["VERIFY<br/>grounding (file:line + API docs)<br/>+ 2×Opus + 1×Sonnet skeptics"]
-        VE --> LP["LOOP ≤3<br/>to convergence"]
-        LP -.loop until converged.-> FO
+    subgraph PROVIDERS [Role-to-model profiles]
+        A["Anthropic"]
+        O["OpenAI / Codex"]
+        L["Ollama · vLLM · OpenRouter<br/>LM Studio · Together"]
     end
 
-    UN ==writes==> MEM
-    IM ==writes==> MEM
-    RE ==writes==> MEM
-    ENGINE ==telemetry==> MEM
-    MEM -.all stages read.-> ENGINE
-
-    MEM[("PROJECT MEMORY<br/>.prism/project-model.md<br/>invariants · conventions · file-concern map<br/>danger zones · decisions · lessons")]
-
-    ENGINE -.measured by.-> EV["/prism-eval<br/>fleet-vs-single · grounding P/R<br/>find-the-floor (may shrink default)"]
-
-    classDef cmd fill:#e7f5ff,stroke:#1971c2,color:#0b3d66;
-    classDef eng fill:#ebfbee,stroke:#2f9e44,color:#11522a;
-    classDef mem fill:#fff9db,stroke:#e8590c,color:#7a3500;
-    classDef ev fill:#f3e8ff,stroke:#7e22ce,color:#4a1d7a;
-    class UN,DE,IM,FB,RE cmd;
-    class EV ev;
-    class FO,DV,JU,VE,LP eng;
-    class MEM mem;
+    PROVIDERS --> CORE
+    V --> P["Proof Packet JSON"]
+    P --> H["Standalone HTML"]
+    P --> Q["Local dashboard"]
+    P --> C["CI merge gate"]
 ```
 
-**How to read it:** one router sends your task to the right stage of a **lifecycle**
-(understand → design → implement → retro). The three heavy stages all run the same
-**Deliberation Engine** — fan out diverse agents, judge their disagreements, verify the
-claims (grounding + skeptics), loop to convergence. Everything reads and writes **Project
-Memory**, so each run makes the next one smarter. That read/write cycle is the part one-shot
-tools don't have.
+**How to read it:** the diff and repository are the case file. Prism assigns grounding and
+skeptic roles to configured models, checks whether cited evidence really exists, asks skeptics
+to break load-bearing claims when the change warrants a panel, and derives a deterministic
+verdict. The JSON schema is the spine: the
+CLI, MCP server, renderer, dashboard, and CI all consume the same Proof Packet.
 
 ---
 
@@ -114,9 +103,9 @@ A single LLM pass has predictable failure modes:
 - it states plausible-but-wrong claims **confidently**,
 - it gives you a conclusion but not the **reasoning** you'd need to trust or learn from it.
 
-This playbook attacks each of those directly:
+Prism attacks each of those directly:
 
-| Failure mode | The fix in this skill |
+| Failure mode | The fix in Prism |
 |---|---|
 | Anchoring on the obvious | An **adversary lens** is always in the panel, arguing the strongest case *against* |
 | Averaging conflicts | A **judge** step that resolves contradictions and picks the better-supported side — never a merge |
@@ -125,7 +114,7 @@ This playbook attacks each of those directly:
 
 ---
 
-## The twelve commands
+## The thirteen commands
 
 | Command | Use it to… | What runs under the hood |
 |---|---|---|
@@ -137,6 +126,7 @@ This playbook attacks each of those directly:
 | **`/prism-retro`** | Learn from a shipped plan | Compares what the plan PREDICTED vs what actually shipped → writes the lessons back into project memory |
 | **`/prism-prune`** | Keep memory trustworthy | Re-verifies every cited invariant against the live code; prunes/corrects stale entries so memory doesn't rot as it grows |
 | **`/prism-eval`** | Prove the fleet beats one pass | Measures divergence, grounding precision/recall, fleet-vs-single win-rate, injected-flaw detection, and the minimal config that still wins — willing to recommend shrinking the default |
+| **`/prism-verify`** | Decide whether an AI-generated diff is safe to merge | Independently grounds claims, runs risk-sized skeptics and tests, then emits a Proof Packet with an accept / human-review / block verdict |
 | **`/prism-write`** | Write human docs for what you built | README · change summary · retroactive code comments · or a clean self-contained HTML article with an architecture diagram. Grounded in the real files, human voice, no slop, no em-dashes. JetBrains style by default; asks for the article only |
 | **`/prism-ship`** | Idea → working dapp, one command | Drives the whole lifecycle autonomously — frame (asks its own gating Qs) → architect → decompose → implement each milestone in self-correcting loops → attack with the full feedback fleet → learn. Pauses only at scope, the approved architecture, and irreversible one-way doors |
 | **`/prism`** | Not sure which — let it decide | Auto-classifies the task into understand / plan / build and runs the right one |
@@ -153,10 +143,11 @@ This playbook attacks each of those directly:
 - `/prism-ship`: One command, idea → working dapp. Autonomously chains the full Prism lifecycle — frame → architect → decompose → implement each milestone in self-correcting loops → adversarially test → learn — generating its own follow-up work and looping until done. Pauses only at scope, the approved architecture, and irreversible one-way doors. Cost-tuned per the eval (lean fleet to design, full fleet to attack).
 - `/prism-understand`: Understand/map existing code or a concept — parallel explorers over each subsystem, synthesized into one coherent model with a file map. Read-only, fast.
 - `/prism-update`: Update your installed Prism to the latest source — pull the clone, re-sync commands + hooks into ~/.claude, prove it landed with the drift check, and tell you what is new. Safe and reversible; never touches your project code.
+- `/prism-verify`: The proof layer — take a diff a coding agent produced and independently verify it is correct, grounded in the real repo, current with its libraries, and safe to merge. Emits a structured Proof Packet with an accept / human-review / block verdict. Does NOT reuse the generating agent's reasoning.
 - `/prism-write`: Write human docs for what you built. Grounded README, change summary, retroactive code comments, or a clean self-contained HTML article with an architecture diagram. Human voice, no AI slop, no em-dashes. JetBrains style by default; asks for the article only.
 - `/prism`: Multi-agent orchestration playbook — auto-routes a task into understand/plan/build, fans parallel lenses, adversarially verifies, loops to convergence, and persists. ("quick" forces a single cheap pass.)
 
-_12 commands. Auto-generated by `scripts/sync-docs.sh`; do not edit by hand._
+_13 commands. Auto-generated by `scripts/sync-docs.sh`; do not edit by hand._
 <!-- /prism:commands -->
 
 ### Is the deliberation real, or theatre? (measured, not asserted)
@@ -166,10 +157,10 @@ careful pass — is now **measurable**, not just claimed:
   *different* code, not just read different prompts.
 - A **divergence score** (Jaccard overlap of the `file:line` sets each lens examined + conclusion
   disagreement) prints on every run and **flags when diversity is cosmetic**.
-- The adversarial skeptics run a **2× Opus + 1× Sonnet (cross-tier)** split to decorrelate blind
-  spots — labelled honestly as *cross-tier, not cross-model*, with **grounding outranking cross-tier
-  survival**. (Sub-agent model selection is by tier only here; the cross-*version* axis isn't
-  available and that limit is recorded in telemetry, never hidden.)
+- Native Claude commands can run a **2× Opus + 1× Sonnet cross-tier** split. Prism Core adds
+  genuine **cross-model** profiles spanning Claude, GPT/Codex, and open models. Every packet records
+  the actual decorrelation axis as `single-model`, `cross-tier`, or `cross-model`; it never inflates
+  one into another.
 - `/prism-eval` + `eval/fixtures/` turn all of this into real numbers — and the harness is
   explicitly allowed to conclude **"shrink the default — the smaller config wins."**
 
@@ -299,13 +290,73 @@ Every plan/build answer is structured to teach the *reasoning*, not just hand ov
 
 ## Install
 
-Claude Code reads slash commands from `.claude/commands/`. Copy these in at whichever
-scope you want:
+### Core CLI and dashboard
+
+Prism Core requires Node.js 20 or newer:
 
 ```bash
-# Clone
 git clone https://github.com/Adityaakr/prism-claude-code.git
 cd prism-claude-code
+npm --prefix core install
+npm --prefix core run build
+
+# Deterministic plumbing check. This does not call a real model.
+node core/dist/cli.js verify --source worktree --profile mock
+
+# Build .prism/dashboard.html from saved Proof Packets.
+node core/dist/cli.js dashboard
+```
+
+For real verification, choose a built-in profile or copy
+[`prism.config.example.json`](prism.config.example.json) to `prism.config.json` and map each
+role to a model:
+
+| Profile | Models | Requirements |
+|---|---|---|
+| `mock` | Deterministic fixtures | No keys; smoke tests only, not evidence that code is correct |
+| `local` | Qwen, DeepSeek, and Llama through Ollama | A running Ollama server with the configured models |
+| `claude` | Anthropic models | `ANTHROPIC_API_KEY` |
+| `balanced` | Claude + GPT/Codex + Ollama | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and Ollama |
+
+```bash
+# Verify the current branch against the repository's default branch.
+node core/dist/cli.js verify \
+  --source branch \
+  --profile balanced \
+  --task "Add proof-layer support" \
+  --test-cmd "npm --prefix core test"
+
+# Other diff sources:
+# --source staged
+# --source worktree
+# --source commit-range --ref HEAD~3..HEAD
+# --source branch --base main
+# --pr 42                    # requires gh
+```
+
+The CLI writes JSON and HTML to `.prism/runs/`. Its exit code is `0` for accept, `1` for
+block, `3` for human review, and `2` for a usage or runtime error, so the same command can
+act as a CI merge gate.
+
+### MCP server
+
+Install the optional MCP SDK and start the stdio server:
+
+```bash
+npm --prefix core install --no-save @modelcontextprotocol/sdk
+npm --prefix core run mcp
+```
+
+The server exposes `prism_verify`, returning both the verdict and the full Proof Packet to
+any MCP-compatible host.
+
+### Native Claude Code commands
+
+Claude Code reads slash commands from `.claude/commands/`. Copy these at whichever scope
+you want:
+
+```bash
+# Run from the cloned prism-claude-code directory.
 
 # Global — available in every project
 mkdir -p ~/.claude/commands
@@ -339,6 +390,15 @@ updated commands load.
 ## Usage
 
 ```bash
+# Independently verify the current worktree and save a Proof Packet
+node core/dist/cli.js verify --source worktree --profile local
+
+# Verify a GitHub PR with a genuine cross-model panel
+node core/dist/cli.js verify --pr 42 --profile balanced --task "Review PR 42"
+
+# Rebuild the local proof and model-comparison dashboard
+node core/dist/cli.js dashboard
+
 # Understand an existing system (read-only, fast)
 /prism-understand explain how invoices get paid in this app end to end
 
@@ -347,6 +407,9 @@ updated commands load.
 
 # Build something new from scratch (frames -> architects -> phased roadmap)
 /prism-build a stablecoin payroll dApp on Arbitrum
+
+# Verify a generated change from inside Claude Code
+/prism-verify verify the staged payment changes before merge
 
 # Let it route automatically
 /prism <anything>
@@ -362,12 +425,14 @@ Each run **states its plan before spending agents** — e.g.
 
 ## Cost & honesty notes
 
-- These commands spawn **many parallel agents**. A deep `/prism-plan` or `/prism-build`
+- Real Core profiles call the models assigned to every role. The `mock` profile proves the
+  pipeline is wired correctly; it does **not** prove a diff is safe.
+- Native commands can spawn **many parallel agents**. A deep `/prism-plan` or `/prism-build`
   run can use dozens of agent calls across its loop rounds — that's the point, but it's
   real token cost. Use `quick` for lightweight questions.
 - More agents are only better when they're **diverse**. The commands enforce this with the
   diversity rule and an adaptive lens panel — they won't clone the same perspective N times.
-- The skill is a **prompt**, not magic. If you ever see it skip a step, add
+- The native command layer is still **prompt-driven**, not magic. If you see it skip a step, add
   `follow every step` to your message, or drop to `quick` so it doesn't over-orchestrate a
   simple ask.
 
