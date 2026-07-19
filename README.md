@@ -25,7 +25,7 @@ OpenAI-compatible endpoints.
 | **MCP server** | Exposes `prism_verify` to Claude Code, Codex, Cursor, Zed, and other MCP clients |
 | **Dashboard + renderer** | Builds a local run history and model-comparison view; renders standalone HTML proof artifacts |
 | **Native Claude commands** | Thirteen commands for understanding, planning, building, implementing, attacking, verifying, learning, and shipping |
-| **Provider profiles** | `mock`, all-local Ollama, Claude-only, cross-model balanced, and custom role-to-model maps |
+| **Provider profiles** | All-local Ollama, Claude-only, cross-model balanced, and custom role-to-model maps |
 
 ---
 
@@ -300,20 +300,16 @@ cd prism-claude-code
 npm --prefix core install
 npm --prefix core run build
 
-# Deterministic plumbing check. This does not call a real model.
-node core/dist/cli.js verify --source worktree --profile mock
-
 # Build .prism/dashboard.html from saved Proof Packets.
 node core/dist/cli.js dashboard
 ```
 
-For real verification, choose a built-in profile or copy
+Choose a built-in profile or copy
 [`prism.config.example.json`](prism.config.example.json) to `prism.config.json` and map each
 role to a model:
 
 | Profile | Models | Requirements |
 |---|---|---|
-| `mock` | Deterministic fixtures | No keys; smoke tests only, not evidence that code is correct |
 | `local` | Qwen, DeepSeek, and Llama through Ollama | A running Ollama server with the configured models |
 | `claude` | Anthropic models | `ANTHROPIC_API_KEY` |
 | `balanced` | Claude + GPT/Codex + Ollama | `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, and Ollama |
@@ -443,8 +439,7 @@ Each run **states its plan before spending agents** — e.g.
 
 ## Cost & honesty notes
 
-- Real Core profiles call the models assigned to every role. The `mock` profile proves the
-  pipeline is wired correctly; it does **not** prove a diff is safe.
+- Every Core profile calls the real models assigned to each role.
 - Native commands can spawn **many parallel agents**. A deep `/prism-plan` or `/prism-build`
   run can use dozens of agent calls across its loop rounds — that's the point, but it's
   real token cost. Use `quick` for lightweight questions.
