@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "prism",
+  "description": "Prism — the proof layer for AI-generated software. Install the verification gate that sits between a coding agent finishing and the work being merged.",
+  "owner": {
+    "name": "Adityaakr",
+    "url": "https://github.com/Adityaakr"
+  },
+  "plugins": [
+    {
+      "name": "prism",
+      "source": "./",
+      "description": "The proof layer: independently verify AI-generated diffs against the live repo and current docs, run a decorrelated skeptic panel, and emit a Proof Packet with an accept / human-review / block verdict. Includes the auto-invoked /prism-verify skill, the full Prism command lifecycle (plan, implement, ship, feedback, retro, …), and the one-way-door Bash guard hook.",
+      "category": "code-quality",
+      "keywords": ["proof-layer", "verification", "merge-gate", "code-review", "model-agnostic"],
+      "license": "MIT"
+    }
+  ]
+}
