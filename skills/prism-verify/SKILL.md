@@ -1,6 +1,8 @@
 ---
-description: The proof layer — take a diff a coding agent produced and independently verify it is correct, grounded in the real repo, current with its libraries, and safe to merge. Emits a structured Proof Packet with an accept / human-review / block verdict. Does NOT reuse the generating agent's reasoning.
+name: prism-verify
+description: The proof layer for AI-generated code. Use RIGHT AFTER a coding agent (or you) finishes a diff and BEFORE it is merged or deployed — take the change and independently verify it is correct, grounded in the real repo, current with its libraries, and safe to merge. Emits a structured Proof Packet with an accept / human-review / block verdict. Invoke when the user says "verify this", "is this safe to merge", "review this diff/PR", "prove it works", or when a change touches money, auth, custody, migrations, a public API, or deletes data. Does NOT reuse the generating agent's reasoning.
 allowed-tools: Task, Read, Grep, Glob, Bash, WebSearch, WebFetch, Write
+argument-hint: "[task description | PR number | branch]"
 ---
 # Prism · Verify: $ARGUMENTS
 
@@ -11,9 +13,10 @@ and you do not take its claims at face value. Every claim about the code is re-c
 CURRENT repository; every claim about an API or library is re-checked against current docs or the
 installed type definitions, **never against a model's memory**.
 
-Output is a **Proof Packet** (schema: `schema/proof-packet.schema.json`) answering six questions —
-Verified · Evidence · Tests · Assumptions · Risks · Verdict — as human markdown AND a machine
-record at `.prism/runs/<id>.json`. The verdict is one of **accept · human-review · block**.
+Output is a **Proof Packet** (schema: `${CLAUDE_PLUGIN_ROOT}/schema/proof-packet.schema.json`)
+answering six questions — Verified · Evidence · Tests · Assumptions · Risks · Verdict — as human
+markdown AND a machine record at `.prism/runs/<id>.json`. The verdict is one of
+**accept · human-review · block**.
 
 ## Layer 0 — User memory (read FIRST)
 Read `~/.prism/user.md`, follow the Persona Protocol, apply standing defaults (testnet-first,
@@ -73,8 +76,8 @@ different prompts. Print the divergence line as usual.
 ## Step 5 — Run the tests (observe, don't assume)
 Run the actual suite. Record what passed, what failed, and what did NOT run (with the reason).
 A failing or skipped test presented by the agent as "done" is a `block`-level finding. Also run
-`hooks/prism-gate.sh` on the diff if available — it catches faked-green (deleted/skipped tests),
-hardcoded secrets, and leftover debug.
+`${CLAUDE_PLUGIN_ROOT}/hooks/prism-gate.sh` on the diff if available — it catches faked-green
+(deleted/skipped tests), hardcoded secrets, and leftover debug.
 
 ## Step 6 — Decide the verdict
 - **accept** — load-bearing claims `grounded`, tests green, no high/critical risk, invariants upheld.
@@ -88,13 +91,14 @@ When in doubt, prefer `human-review` over `accept`. Never rubber-stamp.
 Write BOTH:
 1. **Human markdown** in the reply — the six sections, verdict badge first, risks by severity,
    file:line evidence, and the honest "what I did NOT verify".
-2. **Machine record** — `.prism/runs/<id>.json` conforming to `schema/proof-packet.schema.json`
-   (create `.prism/runs/` if missing; `<id>` = today's date + short slug). This is the spine the
-   Prism artifact renderer and web dashboard read — populate `telemetry.models` (who played which
-   role) and `telemetry.cost` so the model-comparison and cost views have data.
+2. **Machine record** — `.prism/runs/<id>.json` conforming to
+   `${CLAUDE_PLUGIN_ROOT}/schema/proof-packet.schema.json` (create `.prism/runs/` if missing;
+   `<id>` = today's date + short slug). This is the spine the Prism artifact renderer and web
+   dashboard read — populate `telemetry.models` (who played which role) and `telemetry.cost` so the
+   model-comparison and cost views have data.
 3. **Optional artifact** — if the user asks to "share" or "render the proof", populate
-   `renderer/proof-packet.html` with the JSON and publish it via the Artifact tool (a legible,
-   shareable Proof Packet page — proof, not a chat transcript).
+   `${CLAUDE_PLUGIN_ROOT}/renderer/proof-packet.html` with the JSON and publish it via the Artifact
+   tool (a legible, shareable Proof Packet page — proof, not a chat transcript).
 
 ## Always
 - You are independent. If the diff is fine, say so plainly and `accept` — do not manufacture risks.
